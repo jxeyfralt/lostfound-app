@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Item label guide</title>
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; background: #f2f4f8; color: #1a1d23; margin: 0; padding: 24px; }
+  .wrap { max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; }
+  p { color: #6b7280; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 20px; }
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; }
+  .card img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; background: #f2f4f8; }
+  .num { font-size: 1.6rem; font-weight: 800; margin-top: 10px; }
+  .hint { font-size: .8rem; color: #6b7280; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>&#128269; Item label guide</h1>
+    <p>Each photo below is numbered. Match the number to the item, then tell me <strong>&ldquo;1 = &hellip;, 2 = &hellip;&rdquo;</strong> so I can name them.</p>
+    <div class="grid">
+    <div class="card"><img src="/uploads/found-1.jpg" alt=""><div class="num">#1</div><div class="hint">detected: blue</div></div>
+    <div class="card"><img src="/uploads/found-2.jpg" alt=""><div class="num">#2</div><div class="hint">detected: blue</div></div>
+    <div class="card"><img src="/uploads/found-3.jpg" alt=""><div class="num">#3</div><div class="hint">detected: purple</div></div>
+    <div class="card"><img src="/uploads/found-4.jpg" alt=""><div class="num">#4</div><div class="hint">detected: blue</div></div>
+    <div class="card"><img src="/uploads/found-5.jpg" alt=""><div class="num">#5</div><div class="hint">detected: red</div></div>
+    <div class="card"><img src="/uploads/found-6.jpg" alt=""><div class="num">#6</div><div class="hint">detected: gray</div></div>
+    <div class="card"><img src="/uploads/found-7.jpg" alt=""><div class="num">#7</div><div class="hint">detected: gray</div></div>
+    <div class="card"><img src="/uploads/found-8.jpg" alt=""><div class="num">#8</div><div class="hint">detected: blue</div></div>
+    <div class="card"><img src="/uploads/found-9.jpg" alt=""><div class="num">#9</div><div class="hint">detected: gray</div></div>
+    <div class="card"><img src="/uploads/found-10.jpg" alt=""><div class="num">#10</div><div class="hint">detected: blue</div></div>
+    </div>
+  </div>
+</body>
+</html>

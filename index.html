@@ -1,0 +1,2443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lost &amp; Found</title>
+<style>
+  :root {
+    --bg: #f3f4f6;
+    --card: #ffffff;
+    --text: #111827;
+    --muted: #6b7280;
+    --border: #d1d5db;
+    --primary: #4b5563;
+    --primary-600: #374151;
+    --on-primary: #ffffff;
+    --green: #16a34a;
+    --green-600: #15803d;
+    --nav-bg: rgba(255,255,255,.85);
+    --hero-bg: linear-gradient(180deg, #f9fafb 0%, #e5e7eb 100%);
+    --hero-text: #111827;
+    --search-bg: #ffffff;
+    --input-bg: #f3f4f6;
+    --claimed-bg: #f0fdf4;
+    --claimed-border: #bbf7d0;
+    --badge-green-bg: #dcfce7;
+    --badge-green-text: #15803d;
+    --badge-red-bg: #fef2f2;
+    --badge-red-text: #b91c1c;
+    --radius: 16px;
+    --shadow-sm: 0 1px 2px rgba(17,24,39,.06);
+    --shadow: 0 4px 18px rgba(17,24,39,.08);
+  }
+  [data-theme="dark"] {
+    --bg: #0b0f1a;
+    --card: #1e2430;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --border: #2e3540;
+    --primary: #f3f4f6;
+    --primary-600: #e5e7eb;
+    --on-primary: #111827;
+    --green: #15803d;
+    --green-600: #166534;
+    --nav-bg: rgba(11,15,26,.85);
+    --hero-bg: linear-gradient(180deg, #0b0f1a 0%, #111827 100%);
+    --hero-text: #f3f4f6;
+    --search-bg: #1e2430;
+    --input-bg: #161c26;
+    --claimed-bg: #12271a;
+    --claimed-border: #1f4d2f;
+    --badge-green-bg: #12311f;
+    --badge-green-text: #4ade80;
+    --badge-red-bg: #3a1518;
+    --badge-red-text: #f87171;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+    --shadow: 0 4px 18px rgba(0,0,0,.45);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+
+  .nav { position: sticky; top: 0; z-index: 100; background: var(--nav-bg); backdrop-filter: saturate(180%) blur(10px); border-bottom: 1px solid var(--border); }
+  .nav-inner { max-width: 1080px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { font-weight: 800; font-size: 1.15rem; color: var(--text); text-decoration: none; letter-spacing: -.01em; }
+  .brand .mark { color: var(--primary); }
+  .nav-links { display: flex; gap: 22px; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: .92rem; font-weight: 600; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-right { display: flex; align-items: center; gap: 18px; }
+  .theme-toggle { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); width: 38px; height: 38px; border-radius: 10px; font-size: 1.05rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color .15s; }
+  .theme-toggle:hover { border-color: var(--primary); }
+  .admin-btn { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); width: 38px; height: 38px; border-radius: 10px; font-size: 1.05rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color .15s; }
+  .admin-btn:hover { border-color: var(--primary); }
+  .admin-btn.active { border-color: var(--green); color: var(--green); }
+  .nav-text-btn { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 8px 14px; font-size: .85rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: border-color .15s; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .nav-text-btn:hover { border-color: var(--primary); }
+
+  .hero { background: var(--hero-bg); color: var(--hero-text); padding: 76px 20px 96px; text-align: center; }
+  .hero h1 { font-size: 2.7rem; font-weight: 800; letter-spacing: -.03em; line-height: 1.12; }
+  .hero-sub { opacity: .82; margin-top: 14px; font-size: 1.06rem; }
+  .search-box { position: relative; max-width: 620px; margin: 30px auto 0; }
+  .search-icon { position: absolute; left: 21px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; opacity: .55; pointer-events: none; }
+  .search-box input { width: 100%; padding: 17px 22px 17px 54px; border: 1px solid var(--border); border-radius: 999px; font-size: 1.08rem; font-family: inherit; color: var(--text); background: var(--search-bg); box-shadow: var(--shadow); transition: box-shadow .15s, border-color .15s; }
+  .search-box input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(17,24,39,.12), var(--shadow); }
+
+  .container { max-width: 1080px; margin: -44px auto 56px; padding: 0 20px; }
+  .matches { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px; margin-bottom: 22px; }
+  .matches-head { font-weight: 800; font-size: 1.12rem; margin-bottom: 4px; }
+  .matches-sub { color: var(--muted); font-size: .9rem; }
+  .matches-sub-empty { color: var(--muted); padding: 8px 0; }
+  .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; margin-top: 16px; }
+  .photo-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; transition: transform .12s ease, box-shadow .12s ease; }
+  .photo-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .photo-card.claimed { border-color: var(--claimed-border); background: var(--claimed-bg); }
+  .photo-card-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; cursor: zoom-in; background: var(--bg); display: block; }
+  .photo-card-body { padding: 11px 13px 13px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .photo-card-title { font-weight: 600; font-size: .95rem; line-height: 1.25; }
+  .photo-card-color { display: flex; align-items: center; gap: 5px; font-size: .78rem; color: var(--muted); }
+  .color-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
+  .btn-mine { margin-top: auto; background: var(--green); color: #fff; border: none; border-radius: 10px; padding: 9px 12px; font-size: .82rem; font-weight: 600; cursor: pointer; font-family: inherit; width: 100%; transition: background .15s; }
+  .btn-mine:hover { background: var(--green-600); }
+  .photo-card.claimed .btn-mine { background: var(--border); color: var(--text); }
+  .photo-card.claimed .btn-mine:hover { opacity: .85; }
+  .badge-claimed { background: var(--badge-green-bg); color: var(--badge-green-text); font-size: .66rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; text-transform: uppercase; letter-spacing: .04em; vertical-align: middle; }
+
+  .cols { display: grid; grid-template-columns: 1fr 330px; gap: 22px; align-items: start; }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 22px; }
+  h2 { font-size: 1.05rem; font-weight: 800; margin-bottom: 14px; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+  .section-head h2 { margin-bottom: 0; }
+  .cooldown-btn { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 7px 14px; font-size: .82rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: border-color .15s; }
+  .cooldown-btn:hover { border-color: var(--primary); }
+  .cooldown-btn.active { border-color: var(--green); color: var(--green); }
+  .field { margin-bottom: 13px; }
+  .field label { display: block; font-size: .82rem; font-weight: 600; margin-bottom: 5px; color: var(--muted); }
+  .field input { width: 100%; padding: 11px 13px; border: 1px solid var(--border); border-radius: 11px; font-size: 1rem; font-family: inherit; color: var(--text); background: var(--input-bg); transition: border-color .15s, box-shadow .15s; }
+  .field input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(17,24,39,.12); }
+  .btn-primary { width: 100%; background: #111827; color: #fff; border: none; border-radius: 11px; padding: 12px 16px; font-size: .95rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: background .15s; }
+  .btn-primary:hover { background: #1f2937; }
+  .list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .item { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+  .item.found { background: var(--claimed-bg); border-color: var(--claimed-border); }
+  .item-main { flex: 1; min-width: 0; }
+  .item-main h3 { font-size: .98rem; font-weight: 600; }
+  .item.found .item-main h3 { text-decoration: line-through; color: var(--muted); }
+  .owner { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+  .item-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .badge { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 4px 8px; border-radius: 999px; }
+  .badge.lost { background: var(--badge-red-bg); color: var(--badge-red-text); }
+  .badge.resolved { background: var(--badge-green-bg); color: var(--badge-green-text); }
+  .btn-small { background: var(--input-bg); color: var(--primary); border: 1px solid var(--border); border-radius: 9px; padding: 8px 11px; font-size: .8rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .btn-small:hover { border-color: var(--primary); }
+  .item.found .btn-small { background: var(--badge-red-bg); color: var(--badge-red-text); border-color: transparent; }
+  .btn-delete { background: transparent; color: #9ca3af; border: none; padding: 8px 9px; font-size: .85rem; cursor: pointer; border-radius: 8px; }
+  .btn-delete:hover { background: #fee2e2; color: #b91c1c; }
+  .empty { text-align: center; color: var(--muted); padding: 22px 12px; list-style: none; font-size: .92rem; }
+
+  .item-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .item-info { flex: 1; min-width: 0; }
+  .replies { margin-top: 10px; border-left: 3px solid var(--border); padding-left: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .reply { display: flex; gap: 10px; align-items: flex-start; }
+  .reply-img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; flex-shrink: 0; cursor: zoom-in; background: var(--bg); }
+  .lost-img { margin-top: 8px; max-width: 150px; max-height: 150px; border-radius: 10px; cursor: zoom-in; display: block; object-fit: cover; }
+  .reply-body { flex: 1; min-width: 0; }
+  .reply-meta { font-size: .78rem; color: var(--muted); }
+  .reply-msg { font-size: .9rem; margin-top: 2px; word-wrap: break-word; }
+  .btn-reply { margin-top: 10px; background: transparent; color: var(--primary); border: 1px solid var(--border); border-radius: 9px; padding: 7px 12px; font-size: .82rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .btn-reply:hover { background: var(--input-bg); border-color: var(--primary); }
+  .reply-form { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .reply-form input[type="text"], .reply-form textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 9px; font-size: .9rem; font-family: inherit; }
+  .reply-form textarea { resize: vertical; min-height: 52px; }
+  .reply-form-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .reply-form .reply-image { display: none; }
+  .upload-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--bg); color: var(--text); border: 1px dashed var(--border); border-radius: 9px; padding: 8px 12px; font-size: .82rem; font-weight: 600; cursor: pointer; }
+  .upload-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--card); }
+  .reply-img-preview img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; display: block; }
+  .btn-reply-submit { background: var(--primary); color: var(--on-primary); border: none; border-radius: 9px; padding: 8px 14px; font-size: .84rem; font-weight: 600; cursor: pointer; font-family: inherit; margin-left: auto; }
+  .btn-reply-submit:hover { background: var(--primary-600); }
+
+  .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,.88); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+  .lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  .lightbox-close { position: absolute; top: 18px; right: 24px; background: rgba(255,255,255,.18); color: #fff; border: none; font-size: 1.5rem; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; }
+  .lightbox-close:hover { background: rgba(255,255,255,.3); }
+  .burst { position: fixed; pointer-events: none; z-index: 2000; }
+  .burst-ring { position: absolute; top: 0; left: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; border: 3px solid #22c55e; animation: burst-ring .65s ease-out forwards; }
+  .burst-ring2 { position: absolute; top: 0; left: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; border: 3px solid #22c55e; animation: burst-ring .65s ease-out .12s forwards; }
+  .burst-check { position: absolute; top: 0; left: 0; margin: -18px 0 0 -18px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 900; color: #22c55e; animation: burst-check .8s cubic-bezier(.34,1.56,.64,1) forwards; text-shadow: 0 1px 3px rgba(0,0,0,.25); }
+  @keyframes burst-ring { 0% { transform: scale(.2); opacity: 1; } 100% { transform: scale(3.6); opacity: 0; } }
+  @keyframes burst-check { 0% { transform: scale(0); opacity: 0; } 25% { transform: scale(1.3); opacity: 1; } 40% { transform: scale(.95); opacity: 1; } 55% { transform: scale(1.06); opacity: 1; } 70% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+  .toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); background: #111827; color: #fff; padding: 12px 20px; border-radius: 12px; font-size: .92rem; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,.3); z-index: 4000; opacity: 0; transform: translateX(-50%) translateY(12px); transition: opacity .25s, transform .25s; pointer-events: none; max-width: 90vw; text-align: center; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .modal { position: fixed; inset: 0; z-index: 3500; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; }
+  .modal-card { background: var(--card); color: var(--text); border-radius: 14px; padding: 22px; width: 320px; max-width: 90vw; box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+  .modal-card h3 { font-size: 1.05rem; margin-bottom: 14px; }
+  .modal-card input { width: 100%; padding: 11px 13px; border: 1px solid var(--border); border-radius: 10px; font-size: 1rem; font-family: inherit; color: var(--text); background: var(--input-bg); }
+  .modal-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+  .modal-btn { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 9px 16px; font-size: .9rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .modal-btn.primary { background: var(--primary); color: var(--on-primary); border-color: transparent; }
+  .dashboard-modal { position: fixed; inset: 0; z-index: 3600; background: rgba(0,0,0,.6); display: flex; align-items: flex-start; justify-content: center; padding: 40px 16px; overflow-y: auto; animation: dash-in .25s ease; }
+  .dashboard-inner { background: var(--bg); border: 1px solid var(--border); border-radius: 18px; width: 720px; max-width: 95vw; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,.45); }
+  .dashboard-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .dashboard-head h2 { font-size: 1.15rem; margin-bottom: 0; }
+  .dashboard-close { background: transparent; border: none; color: var(--muted); font-size: 1.3rem; cursor: pointer; padding: 4px 8px; border-radius: 8px; }
+  .dashboard-close:hover { background: var(--input-bg); color: var(--text); }
+  .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 700px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; text-align: center; box-shadow: var(--shadow-sm); }
+  .stat-num { font-size: 1.9rem; font-weight: 800; line-height: 1.1; }
+  .stat-label { font-size: .74rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .04em; }
+  .activity-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow-sm); }
+  .activity-card h3 { font-size: .95rem; font-weight: 800; margin-bottom: 10px; }
+  .activity-feed { list-style: none; display: flex; flex-direction: column; max-height: 280px; overflow-y: auto; }
+  .activity-item { display: flex; align-items: center; gap: 10px; font-size: .88rem; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .activity-dot.claim { background: var(--green); }
+  .activity-dot.post { background: var(--primary); }
+  .activity-dot.reply { background: #3b82f6; }
+  .activity-dot.delete { background: #ef4444; }
+  .activity-text { flex: 1; min-width: 0; word-wrap: break-word; }
+  .activity-time { font-size: .74rem; color: var(--muted); flex-shrink: 0; }
+  @keyframes dash-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+  .meteor { position: fixed; top: 50vh; left: 50vw; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #fde047 30%, #f97316 70%, rgba(249,115,22,0) 100%); box-shadow: 0 0 45px 22px rgba(251,146,60,.7); z-index: 5000; pointer-events: none; animation: meteor-fall 1s ease-in forwards; }
+  @keyframes meteor-fall { 0% { transform: translate(-45vw, -80vh) scale(.6); opacity: 0; } 8% { opacity: 1; } 100% { transform: translate(0, 0) scale(1.6); opacity: 1; } }
+  .explosion-flash { position: fixed; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,1) 0%, rgba(255,255,255,.7) 25%, transparent 60%); z-index: 5000; pointer-events: none; animation: flash-fade .7s ease-out forwards; }
+  @keyframes flash-fade { 0% { opacity: 1; } 100% { opacity: 0; } }
+  .fireball { position: fixed; top: 50vh; left: 50vw; width: 180px; height: 180px; margin: -90px 0 0 -90px; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #fde047 18%, #f97316 45%, #ef4444 70%, rgba(239,68,68,0) 100%); z-index: 5001; pointer-events: none; animation: fireball-pop 1.1s ease-out forwards; }
+  @keyframes fireball-pop { 0% { transform: scale(.2); opacity: 1; } 45% { transform: scale(1.5); opacity: .95; } 100% { transform: scale(2.8); opacity: 0; } }
+  .shockwave { position: fixed; top: 50vh; left: 50vw; width: 50px; height: 50px; margin: -25px 0 0 -25px; border-radius: 50%; border: 4px solid rgba(255,255,255,.9); z-index: 5002; pointer-events: none; animation: shock-expand .9s ease-out forwards; }
+  @keyframes shock-expand { 0% { transform: scale(.4); opacity: 1; } 100% { transform: scale(9); opacity: 0; } }
+  .spark { position: fixed; top: 50vh; left: 50vw; width: 9px; height: 9px; margin: -4px 0 0 -4px; border-radius: 50%; z-index: 5003; pointer-events: none; animation: spark-fly 1s ease-out forwards; }
+  @keyframes spark-fly { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(.15); opacity: 0; } }
+  .boom-text { position: fixed; top: 50vh; left: 50vw; transform: translate(-50%, -50%); font-size: 3.2rem; font-weight: 900; color: #fff; z-index: 5004; pointer-events: none; white-space: nowrap; text-shadow: 0 0 30px rgba(249,115,22,.95), 0 0 70px rgba(239,68,68,.9); animation: boom-pop 1.3s cubic-bezier(.34,1.56,.64,1) forwards; }
+  @keyframes boom-pop { 0% { transform: translate(-50%, -50%) scale(.2); opacity: 0; } 25% { transform: translate(-50%, -50%) scale(1.35); opacity: 1; } 55% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
+  .shake { animation: screen-shake .55s; }
+  @keyframes screen-shake { 0%, 100% { transform: translate(0, 0); } 10% { transform: translate(-12px, 7px); } 20% { transform: translate(10px, -9px); } 30% { transform: translate(-8px, 5px); } 40% { transform: translate(7px, -5px); } 50% { transform: translate(-5px, 3px); } 60% { transform: translate(4px, -3px); } 70% { transform: translate(-3px, 2px); } 80% { transform: translate(2px, -1px); } 90% { transform: translate(-1px, 0); } }
+  .abuse-card { width: 440px; }
+  .abuse-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .abuse-btn { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 13px; font-size: .9rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: border-color .15s, transform .1s; }
+  .abuse-btn:hover { border-color: var(--primary); transform: translateY(-1px); }
+  .abuse-btn:active { transform: scale(.96); }
+  .abuse-btn[data-effect="everything"] { grid-column: 1 / -1; }
+  .meteor { position: fixed; top: 50vh; left: 50vw; z-index: 5000; pointer-events: none; animation: meteor-fall 1.2s cubic-bezier(.5,0,.85,.35) forwards; }
+  .meteor .rock { position: absolute; width: 150px; height: 150px; left: -75px; top: -75px; clip-path: polygon(50% 0%, 68% 10%, 90% 20%, 100% 44%, 92% 66%, 100% 88%, 76% 100%, 50% 94%, 24% 100%, 4% 86%, 0% 58%, 12% 32%, 30% 14%); background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.4) 0%, transparent 34%), radial-gradient(circle at 60% 68%, rgba(0,0,0,.5) 0%, transparent 42%), radial-gradient(circle at 50% 55%, #78716c 0%, #57534e 32%, #292524 68%, #1c1917 100%); }
+  .meteor .glow { position: absolute; width: 260px; height: 260px; left: -130px; top: -130px; border-radius: 50%; background: radial-gradient(circle, rgba(251,146,60,.7) 0%, rgba(249,115,22,.32) 45%, transparent 70%); filter: blur(6px); }
+  .meteor .tail { position: absolute; left: 0; top: -70px; width: 14px; height: 280px; transform: translateX(-50%); background: linear-gradient(180deg, transparent, rgba(249,115,22,.25), rgba(251,146,60,.9), #fde047); border-radius: 999px; filter: blur(3px); }
+  @keyframes meteor-fall { 0% { transform: translate(-8vw, -95vh) scale(.5) rotate(0deg); opacity: 0; } 6% { opacity: 1; } 100% { transform: translate(0, 0) scale(1.05) rotate(16deg); opacity: 1; } }
+  .fire-glow { position: fixed; inset: 0; background: radial-gradient(ellipse at 50% 115%, rgba(249,115,22,.95), rgba(239,68,68,.6) 35%, transparent 68%); z-index: 4980; pointer-events: none; animation: fire-glow-anim 4s ease forwards; }
+  @keyframes fire-glow-anim { 0% { opacity: 0; } 18% { opacity: .8; } 50% { opacity: .9; } 80% { opacity: .75; } 100% { opacity: 0; } }
+  .flame { position: fixed; bottom: -20px; z-index: 4990; pointer-events: none; clip-path: polygon(50% 0%, 66% 34%, 100% 72%, 74% 100%, 26% 100%, 0% 72%, 34% 34%); background: linear-gradient(0deg, #7f1d1d 0%, #ef4444 30%, #f97316 60%, #fbbf24 82%, #fde047 100%); transform-origin: bottom center; animation: flame-grow .9s cubic-bezier(.2,.8,.3,1) forwards, flame-flicker .28s ease-in-out infinite alternate; }
+  @keyframes flame-grow { 0% { transform: scaleY(0); opacity: 0; } 30% { opacity: 1; } 100% { transform: scaleY(1); opacity: 1; } }
+  @keyframes flame-flicker { 0% { filter: brightness(.85) hue-rotate(-4deg); } 50% { filter: brightness(1.18) hue-rotate(3deg); } 100% { filter: brightness(.95) hue-rotate(0deg); } }
+  .ember { position: fixed; bottom: 0; width: 6px; height: 6px; border-radius: 50%; background: #fbbf24; box-shadow: 0 0 10px 3px rgba(251,146,60,.85); z-index: 4995; pointer-events: none; animation: ember-rise 1.6s ease-out forwards; }
+  @keyframes ember-rise { 0% { transform: translate(0, 0); opacity: 1; } 100% { transform: translate(var(--ex), -95vh); opacity: 0; } }
+  .explosion-flash { position: fixed; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,1) 0%, rgba(255,255,255,.7) 25%, transparent 60%); z-index: 5000; pointer-events: none; animation: flash-fade .7s ease-out forwards; }
+  @keyframes flash-fade { 0% { opacity: 1; } 100% { opacity: 0; } }
+  .fireball { position: fixed; top: 50vh; left: 50vw; width: 180px; height: 180px; margin: -90px 0 0 -90px; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #fde047 18%, #f97316 45%, #ef4444 70%, rgba(239,68,68,0) 100%); z-index: 5001; pointer-events: none; animation: fireball-pop 1.1s ease-out forwards; }
+  @keyframes fireball-pop { 0% { transform: scale(.2); opacity: 1; } 45% { transform: scale(1.5); opacity: .95; } 100% { transform: scale(2.8); opacity: 0; } }
+  .smoke { position: fixed; top: 50vh; left: 50vw; border-radius: 50%; background: radial-gradient(circle, rgba(80,80,80,.5) 0%, rgba(50,50,50,.25) 50%, transparent 75%); z-index: 5001; pointer-events: none; animation: smoke-rise 1.6s ease-out forwards; }
+  @keyframes smoke-rise { 0% { transform: translate(var(--sx), var(--sy)) scale(.3); opacity: .8; } 100% { transform: translate(var(--sx), calc(var(--sy) - 60px)) scale(2.2); opacity: 0; } }
+  .shockwave { position: fixed; top: 50vh; left: 50vw; width: 50px; height: 50px; margin: -25px 0 0 -25px; border-radius: 50%; border: 4px solid rgba(255,255,255,.9); z-index: 5002; pointer-events: none; animation: shock-expand .9s ease-out forwards; }
+  @keyframes shock-expand { 0% { transform: scale(.4); opacity: 1; } 100% { transform: scale(9); opacity: 0; } }
+  .spark { position: fixed; top: 50vh; left: 50vw; width: 9px; height: 9px; margin: -4px 0 0 -4px; border-radius: 50%; z-index: 5003; pointer-events: none; animation: spark-fly 1s ease-out forwards; }
+  @keyframes spark-fly { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(.15); opacity: 0; } }
+  .boom-text { position: fixed; top: 50vh; left: 50vw; transform: translate(-50%, -50%); font-size: 3.4rem; font-weight: 900; color: transparent; -webkit-background-clip: text; background-clip: text; background-image: linear-gradient(180deg, #fff, #fde047, #f97316, #ef4444); z-index: 5004; pointer-events: none; white-space: nowrap; filter: drop-shadow(0 0 22px rgba(249,115,22,.9)); animation: boom-pop 1.3s cubic-bezier(.34,1.56,.64,1) forwards; }
+  @keyframes boom-pop { 0% { transform: translate(-50%, -50%) scale(.2); opacity: 0; } 25% { transform: translate(-50%, -50%) scale(1.35); opacity: 1; } 55% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
+  .nuke-flash { position: fixed; inset: 0; background: radial-gradient(circle at 50% 50%, #fff 0%, #fde047 20%, #f97316 45%, #ef4444 75%, transparent 100%); z-index: 5000; pointer-events: none; animation: flash-fade 1s ease-out forwards; }
+  .nuke-fireball { position: fixed; top: 50vh; left: 50vw; width: 320px; height: 320px; margin: -160px 0 0 -160px; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #fde047 15%, #f97316 40%, #ef4444 65%, rgba(239,68,68,0) 100%); z-index: 5001; pointer-events: none; animation: nuke-pop 1.5s ease-out forwards; }
+  @keyframes nuke-pop { 0% { transform: scale(.1); opacity: 1; } 40% { transform: scale(1.6); opacity: .95; } 100% { transform: scale(4); opacity: 0; } }
+  .fw-spark { position: fixed; width: 8px; height: 8px; border-radius: 50%; z-index: 4990; pointer-events: none; animation: fw-fly .9s ease-out forwards; }
+  .fw-flash { position: fixed; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: radial-gradient(circle, #fff, rgba(255,255,255,0) 70%); z-index: 4990; pointer-events: none; animation: fw-pop .5s ease-out forwards; }
+  @keyframes fw-pop { 0% { transform: scale(.3); opacity: 1; } 100% { transform: scale(3.2); opacity: 0; } }
+  @keyframes fw-fly { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--dx), calc(var(--dy) + 45px)) scale(.2); opacity: 0; } }
+  .bolt { position: fixed; top: -5vh; left: 50%; width: 5px; height: 60vh; transform: translateX(-50%); background: linear-gradient(180deg, #fff7ed, #fde047, #fbbf24); box-shadow: 0 0 30px 14px rgba(253,224,71,.95), 0 0 70px 30px rgba(251,191,36,.5); clip-path: polygon(30% 0%, 70% 0%, 60% 20%, 85% 28%, 48% 44%, 72% 52%, 40% 74%, 58% 82%, 30% 100%, 24% 84%, 44% 76%, 30% 48%, 46% 40%, 20% 24%, 38% 16%); z-index: 5002; pointer-events: none; animation: bolt-flash .32s steps(2) forwards; }
+  @keyframes bolt-flash { 0% { opacity: 1; } 100% { opacity: 0; } }
+  .lightning-flash { position: fixed; inset: 0; background: rgba(255,255,255,.85); z-index: 5000; pointer-events: none; animation: lf .5s ease-out forwards; }
+  @keyframes lf { 0% { opacity: 1; } 20% { opacity: 0; } 40% { opacity: .9; } 60% { opacity: .1; } 80% { opacity: .7; } 100% { opacity: 0; } }
+  .rain-drop { position: fixed; top: -20px; width: 2px; height: 26px; background: linear-gradient(180deg, transparent, #8ab8ff); z-index: 4980; pointer-events: none; animation: rain-fall linear forwards; }
+  @keyframes rain-fall { to { transform: translateY(105vh) translateX(-6vh); } }
+  .snowflake { position: fixed; top: -20px; width: 10px; height: 10px; border-radius: 50%; background: #fff; opacity: .85; z-index: 4980; pointer-events: none; animation: snow-fall linear forwards; }
+  @keyframes snow-fall { 0% { transform: translate(0, 0); } 100% { transform: translate(var(--sx), 105vh); } }
+  .confetti-piece { position: fixed; top: -30px; width: 10px; height: 16px; z-index: 4980; pointer-events: none; animation: confetti-fall linear forwards; }
+  @keyframes confetti-fall { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(var(--sx), 110vh) rotate(var(--rot)); } }
+  .rainbow-wrap { position: fixed; inset: 0; z-index: 4990; pointer-events: none; animation: rainbow-mask 3.6s ease-in-out forwards; }
+  .rainbow-arc { position: absolute; left: 50%; bottom: -40vw; width: 80vw; height: 80vw; margin-left: -40vw; border-radius: 50%; background: radial-gradient(circle closest-side, transparent 40%, #7c3aed 40%, #7c3aed 46%, #3b82f6 46%, #3b82f6 53%, #22c55e 53%, #22c55e 60%, #eab308 60%, #eab308 67%, #f97316 67%, #f97316 74%, #ef4444 74%, #ef4444 81%, transparent 81%); clip-path: inset(0 0 50% 0); }
+  @keyframes rainbow-mask { 0% { clip-path: inset(0 100% 0 0); } 40% { clip-path: inset(0 0 0 0); } 70% { clip-path: inset(0 0 0 0); } 100% { clip-path: inset(0 0 0 100%); } }
+  .shake { animation: screen-shake .55s; }
+  .shake-big { animation: screen-shake-big .9s; }
+  @keyframes screen-shake { 0%, 100% { transform: translate(0, 0); } 10% { transform: translate(-12px, 7px); } 20% { transform: translate(10px, -9px); } 30% { transform: translate(-8px, 5px); } 40% { transform: translate(7px, -5px); } 50% { transform: translate(-5px, 3px); } 60% { transform: translate(4px, -3px); } 70% { transform: translate(-3px, 2px); } 80% { transform: translate(2px, -1px); } 90% { transform: translate(-1px, 0); } }
+  @keyframes screen-shake-big { 0%, 100% { transform: translate(0, 0); } 10% { transform: translate(-24px, 14px); } 20% { transform: translate(20px, -18px); } 30% { transform: translate(-16px, 10px); } 40% { transform: translate(14px, -10px); } 50% { transform: translate(-10px, 6px); } 60% { transform: translate(8px, -6px); } 70% { transform: translate(-6px, 4px); } 80% { transform: translate(4px, -2px); } 90% { transform: translate(-2px, 0); } }
+  .disco-string { position: fixed; top: -5px; left: 50%; width: 2px; height: 13vh; margin-left: -1px; background: linear-gradient(180deg, #fff, rgba(255,255,255,.4)); z-index: 5010; pointer-events: none; }
+  .disco-ball { position: fixed; top: -140px; left: 50%; width: 130px; height: 130px; margin-left: -65px; border-radius: 50%; z-index: 5010; pointer-events: none; background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.95), rgba(255,255,255,.15) 38%, transparent 62%), repeating-conic-gradient(rgba(210,225,255,.95) 0 9deg, rgba(130,150,190,.95) 9deg 18deg); box-shadow: 0 0 70px 26px rgba(255,255,255,.35), 0 0 140px 60px rgba(200,200,255,.2), inset 0 0 44px rgba(0,0,0,.45); animation: disco-drop .9s cubic-bezier(.2,.8,.3,1) forwards, disco-spin 3s linear .9s infinite; }
+  @keyframes disco-drop { 0% { top: -140px; } 100% { top: 12vh; } }
+  @keyframes disco-spin { to { transform: rotate(360deg); } }
+  .dance-square { position: fixed; z-index: 4985; pointer-events: none; opacity: .5; animation: dance-color 2.2s ease-in-out infinite; transition: opacity 1.6s ease; }
+  @keyframes dance-color { 0% { background: #ff4d6d; } 16% { background: #ffb703; } 33% { background: #06d6a0; } 50% { background: #118ab2; } 66% { background: #8338ec; } 83% { background: #ff006e; } 100% { background: #ff4d6d; } }
+  .tsunami-wave { position: fixed; top: 0; right: -105vw; width: 105vw; height: 100vh; z-index: 5040; pointer-events: none; background: linear-gradient(180deg, #7dd3fc 0%, #38bdf8 22%, #1d4ed8 68%, #0c2d6b 100%); border-radius: 45% 0 0 45%; animation: tsunami-sweep 2.4s ease-in forwards; }
+  @keyframes tsunami-sweep { 0% { transform: translateX(0); } 100% { transform: translateX(-120vw); } }
+  .tsunami-water { position: fixed; left: 0; right: 0; bottom: 0; height: 100vh; z-index: 5035; pointer-events: none; background: linear-gradient(180deg, rgba(56,189,248,.25) 0%, rgba(29,78,216,.55) 40%, rgba(12,45,107,.8) 100%); transform: translateY(100%); transition: transform 1s ease-in-out; }
+  .tsunami-water.filled { transform: translateY(0); }
+  .tsunami-water.drained { transform: translateY(100%); transition: transform 1.6s ease-in; }
+  .sea-creature { position: fixed; z-index: 5042; pointer-events: none; animation: sea-swim linear infinite; }
+  @keyframes sea-swim { 0% { transform: translateX(-10vw) translateY(0); } 25% { transform: translateX(30vw) translateY(-3vh); } 50% { transform: translateX(60vw) translateY(2vh); } 75% { transform: translateX(85vw) translateY(-3vh); } 100% { transform: translateX(110vw) translateY(0); } }
+  .space-craft { position: fixed; left: -15vw; z-index: 5045; pointer-events: none; animation: craft-zoom linear forwards; }
+  @keyframes craft-zoom { 0% { transform: translateX(0) translateY(0) rotate(-8deg) scale(.8); } 50% { transform: translateX(50vw) translateY(-4vh) rotate(4deg) scale(1.15); } 100% { transform: translateX(115vw) translateY(1vh) rotate(-6deg) scale(.9); } }
+  .laser-beam { position: fixed; z-index: 5043; pointer-events: none; height: 3px; width: 30vw; background: linear-gradient(90deg, transparent, #f43f5e, #fff, #f43f5e, transparent); box-shadow: 0 0 12px #f43f5e; animation: laser-fade .5s ease-out forwards; }
+  @keyframes laser-fade { 0% { opacity: 1; } 100% { opacity: 0; } }
+  .penguin { position: fixed; right: -12vw; z-index: 5020; pointer-events: none; animation: penguin-waddle linear forwards; }
+  @keyframes penguin-waddle { 0% { transform: translateX(0) rotate(-6deg); } 25% { transform: translateX(-25vw) rotate(6deg); } 50% { transform: translateX(-50vw) rotate(-6deg); } 75% { transform: translateX(-75vw) rotate(6deg); } 100% { transform: translateX(-125vw) rotate(0deg); } }
+  .meteor3d { position: fixed; inset: 0; z-index: 5000; pointer-events: none; }
+  .hidden { display: none !important; }
+  .footer { text-align: center; color: var(--muted); font-size: .82rem; padding: 22px 20px 34px; }
+  .broadcast-banner { position: fixed; left: 50%; top: 46%; transform: translate(-50%, -50%); z-index: 9000; background: transparent; color: var(--text); padding: 8px 20px; font-size: 2rem; font-weight: 500; font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; letter-spacing: -.01em; max-width: min(90vw, 780px); text-align: center; line-height: 1.35; opacity: 1; transition: opacity 1.4s ease; pointer-events: none; text-shadow: 0 2px 12px rgba(0,0,0,.12); }
+  .broadcast-banner.fade { opacity: 0; }
+  .broadcast-box { display: flex; gap: 8px; margin-top: 14px; }
+  .broadcast-box input { flex: 1; min-width: 0; padding: 12px 14px; font-size: .95rem; border: 1px solid var(--border); border-radius: 10px; background: var(--input-bg); color: var(--text); font-family: inherit; }
+  .broadcast-box input:focus { outline: none; border-color: var(--primary); }
+  .broadcast-send { padding: 12px 18px; font-size: .9rem; font-weight: 700; border: none; border-radius: 10px; background: var(--primary); color: var(--on-primary); cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .broadcast-send:hover { background: var(--primary-600); }
+  .chat-fab { position: fixed; right: 22px; bottom: 22px; z-index: 9500; width: 56px; height: 56px; border-radius: 50%; border: none; background: var(--primary); color: var(--on-primary); font-size: 1.6rem; cursor: pointer; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; transition: transform .15s; }
+  .chat-fab:hover { transform: scale(1.06); }
+  .chat-panel { position: fixed; right: 22px; bottom: 90px; z-index: 9500; width: min(360px, calc(100vw - 32px)); height: 480px; max-height: calc(100vh - 120px); background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; }
+  .chat-panel.hidden { display: none; }
+  .chat-head { padding: 14px 16px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: .95rem; display: flex; align-items: center; gap: 8px; color: var(--text); }
+  .chat-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .chat-msg { max-width: 85%; padding: 10px 13px; border-radius: 14px; font-size: .9rem; line-height: 1.4; white-space: pre-wrap; word-wrap: break-word; }
+  .chat-msg.bot { align-self: flex-start; background: var(--input-bg); color: var(--text); border-bottom-left-radius: 4px; }
+  .chat-msg.user { align-self: flex-end; background: var(--primary); color: var(--on-primary); border-bottom-right-radius: 4px; }
+  .chat-input-row { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--border); }
+  .chat-input-row input { flex: 1; padding: 10px 13px; border: 1px solid var(--border); border-radius: 999px; background: var(--input-bg); color: var(--text); font-size: .92rem; font-family: inherit; }
+  .chat-input-row input:focus { outline: none; border-color: var(--primary); }
+  .chat-send { background: var(--primary); color: var(--on-primary); border: none; border-radius: 999px; padding: 0 18px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
+</style>
+<script>
+  try { if (localStorage.getItem('lf-theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <span class="brand">&#128269; Lost<span class="mark">&amp;</span>Found</span>
+      <div class="nav-right">
+        <div class="nav-links">
+          <a href="#search">Search</a>
+          <a href="#report">Report lost</a>
+        </div>
+        <button id="theme-toggle" class="theme-toggle" title="Toggle dark mode">&#127769;</button>
+        <button id="admin-btn" class="admin-btn" title="Admin">&#128274;</button>
+        <button id="dashboard-btn" class="nav-text-btn hidden">&#128202; Dashboard</button>
+        <button id="abuse-btn" class="nav-text-btn hidden">&#9732;&#65039; Admin Abuse</button>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <h1>Lost something?<br>We might have it.</h1>
+    <p class="hero-sub">Search the box to see if your item has been turned in.</p>
+    <div class="search-box" id="search">
+      <span class="search-icon">&#128269;</span>
+      <input id="search-input" type="text" placeholder="Search &mdash; e.g. Waterbottles, Jackets, Pens" autocomplete="off">
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="admin-dashboard" class="dashboard-modal hidden">
+      <div class="dashboard-inner">
+        <div class="dashboard-head">
+          <h2>Dashboard</h2>
+          <button id="dashboard-close" class="dashboard-close" title="Close">&#10005;</button>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Items</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-available">0</div><div class="stat-label">Available</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-claimed">0</div><div class="stat-label">Claimed</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-lost">0</div><div class="stat-label">Lost reports</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-replies">0</div><div class="stat-label">Replies</div></div>
+        </div>
+        <div class="activity-card">
+          <h3>Recent activity</h3>
+          <ul id="activity-feed" class="activity-feed"><li class="empty">No activity yet.</li></ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="matches" class="matches hidden"></div>
+
+    <div class="cols">
+      <section class="card">
+        <div class="section-head">
+          <h2>Lost reports</h2>
+          <button id="cooldown-btn" class="cooldown-btn hidden">Cooldown: OFF</button>
+        </div>
+        <ul id="lost-list" class="list"><li class="empty">No lost reports yet.</li></ul>
+      </section>
+      <aside class="card" id="report">
+        <h2>Report a lost item</h2>
+        <form id="form">
+          <div class="field">
+            <label for="name">Your name</label>
+            <input id="name" type="text" placeholder="e.g. Joey C" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="item">What did you lose?</label>
+            <input id="item" type="text" placeholder="e.g. Water bottle, jacket, pen" autocomplete="off">
+          </div>
+          <div class="field">
+            <label>Photo (optional)</label>
+            <label class="upload-btn" for="report-photo">&#128247; Upload image</label>
+            <input id="report-photo" type="file" accept="image/*" class="hidden">
+            <span id="report-photo-preview" class="reply-img-preview hidden"></span>
+          </div>
+          <button type="submit" class="btn-primary">+ Add lost report</button>
+        </form>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="footer">
+    &#128269; Lost &amp; Found &mdash; found-item photos are added by the organizer.
+  </footer>
+
+  <div id="lightbox" class="lightbox hidden">
+    <img id="lightbox-img" src="" alt="">
+    <button id="lightbox-close" class="lightbox-close" title="Close">&#10005;</button>
+  </div>
+
+  <div id="admin-modal" class="modal hidden">
+    <div class="modal-card">
+      <h3>Admin access</h3>
+      <input id="admin-pass-input" type="password" placeholder="Enter passcode" autocomplete="off">
+      <div class="modal-actions">
+        <button id="admin-cancel" class="modal-btn">Cancel</button>
+        <button id="admin-unlock" class="modal-btn primary">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="abuse-modal" class="modal hidden">
+    <div class="modal-card abuse-card">
+      <div class="dashboard-head">
+        <h2>Admin Abuse</h2>
+        <button id="abuse-close" class="dashboard-close" title="Close">&#10005;</button>
+      </div>
+      <div class="abuse-grid">
+        <button class="abuse-btn" data-effect="meteor">&#128293; Meteor</button>
+        <button class="abuse-btn" data-effect="nuke">&#128165; Nuke</button>
+        <button class="abuse-btn" data-effect="tsunami">&#127754; Tsunami</button>
+        <button class="abuse-btn" data-effect="spacebattle">&#128760; UFO</button>
+        <button class="abuse-btn" data-effect="penguins">&#128039; Penguins</button>
+        <button class="abuse-btn" data-effect="disco">&#127981; Disco</button>
+        <button class="abuse-btn" data-effect="everything">&#127881; Everything</button>
+      </div>
+      <div class="broadcast-box">
+        <input id="broadcast-input" type="text" placeholder="Message everyone…" autocomplete="off">
+        <button id="broadcast-send" class="broadcast-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="broadcast-banner" class="broadcast-banner hidden"></div>
+
+  <button id="chat-fab" class="chat-fab" title="Chat">&#128172;</button>
+  <div id="chat-panel" class="chat-panel hidden">
+    <div class="chat-head">&#129302; Lost &amp; Found helper</div>
+    <div class="chat-body" id="chat-body"></div>
+    <div class="chat-input-row">
+      <input id="chat-input" type="text" placeholder="Ask about the site…" autocomplete="off">
+      <button id="chat-send" class="chat-send">Send</button>
+    </div>
+  </div>
+
+<script>
+var items = [];
+
+var clientId = localStorage.getItem('lf-client-id');
+if (!clientId) {
+  clientId = 'c-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  localStorage.setItem('lf-client-id', clientId);
+}
+
+var pendingReportImage = null;
+
+var COLOR_WORDS = ['black','white','gray','grey','silver','red','orange','yellow','green','blue','navy','purple','violet','pink','brown','gold','teal','cyan','tan','beige','cream','clear'];
+
+var COLOR_HEX = {
+  red: '#ef4444', orange: '#f97316', yellow: '#eab308', green: '#22c55e',
+  blue: '#3b82f6', purple: '#a855f7', pink: '#ec4899', brown: '#92400e',
+  black: '#111827', white: '#f3f4f6', gray: '#9ca3af'
+};
+
+var STOPWORDS = ['the','a','an','and','or','of','to','in','on','for','with','my','mine','me','i','is','was','are','it','its','that','this','lost','found','find','looking','please','help','need','from','at','by','as','so','not','no','have','has','had','do','does','did','can','could','would','should','will','your','you'];
+
+var SYNONYMS = {
+  bottle: 'bottle', waterbottle: 'bottle', canteen: 'bottle', flask: 'bottle', thermos: 'bottle', tumbler: 'bottle', hydroflask: 'bottle', camelbak: 'bottle', stanley: 'bottle',
+  jacket: 'jacket', coat: 'jacket', hoodie: 'jacket', hoody: 'jacket', sweater: 'jacket', sweatshirt: 'jacket', windbreaker: 'jacket', cardigan: 'jacket', parka: 'jacket', puffer: 'jacket', fleece: 'jacket', blazer: 'jacket',
+  pen: 'pen', pens: 'pen', pencil: 'pen', marker: 'pen', highlighter: 'pen', sharpie: 'pen', ballpoint: 'pen', biro: 'pen',
+  headphones: 'headphones', earbuds: 'headphones', earphones: 'headphones', headset: 'headphones', airpods: 'headphones', earpods: 'headphones', buds: 'headphones', beats: 'headphones',
+  phone: 'phone', cellphone: 'phone', cell: 'phone', iphone: 'phone', smartphone: 'phone', android: 'phone', mobile: 'phone',
+  keys: 'keys', key: 'keys', keychain: 'keys', keyring: 'keys', fob: 'keys', lanyard: 'keys',
+  wallet: 'wallet', purse: 'wallet', cardholder: 'wallet', moneyclip: 'wallet', billfold: 'wallet',
+  glasses: 'glasses', glass: 'glasses', shades: 'glasses', shade: 'glasses', sunglasses: 'glasses', sunnies: 'glasses', specs: 'glasses', spectacles: 'glasses', eyeglasses: 'glasses', goggles: 'glasses', readers: 'glasses',
+  umbrella: 'umbrella', brolly: 'umbrella', parasol: 'umbrella',
+  shoes: 'shoes', shoe: 'shoes', sneakers: 'shoes', sneaker: 'shoes', kicks: 'shoes', trainers: 'shoes', jordans: 'shoes', jordan: 'shoes', nikes: 'shoes', boots: 'shoes', boot: 'shoes', sandals: 'shoes', sandal: 'shoes', slippers: 'shoes', slipper: 'shoes', flipflops: 'shoes', flipflop: 'shoes', slides: 'shoes', heels: 'shoes', loafers: 'shoes', vans: 'shoes', converse: 'shoes', crocs: 'shoes',
+  charger: 'charger', cable: 'charger', cord: 'charger', adapter: 'charger', powerbank: 'charger',
+  watch: 'watch', wristwatch: 'watch', smartwatch: 'watch',
+  hat: 'hat', cap: 'hat', beanie: 'hat', snapback: 'hat',
+  gloves: 'gloves', glove: 'gloves', mittens: 'gloves',
+  scarf: 'scarf',
+  notebook: 'notebook', notepad: 'notebook', binder: 'notebook', journal: 'notebook'
+};
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  var diff = Date.now() - new Date(iso).getTime();
+  var mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + 'm ago';
+  var hours = Math.floor(mins / 60);
+  if (hours < 24) return hours + 'h ago';
+  var days = Math.floor(hours / 24);
+  return days + 'd ago';
+}
+
+function colorFromText(text) {
+  var t = ' ' + String(text).toLowerCase() + ' ';
+  for (var i = 0; i < COLOR_WORDS.length; i++) {
+    var w = COLOR_WORDS[i];
+    if (t.indexOf(' ' + w + ' ') !== -1) {
+      if (w === 'grey' || w === 'silver') return 'gray';
+      if (w === 'navy' || w === 'cyan' || w === 'teal') return 'blue';
+      if (w === 'violet') return 'purple';
+      if (w === 'tan' || w === 'beige' || w === 'cream') return 'brown';
+      if (w === 'gold') return 'yellow';
+      return w;
+    }
+  }
+  return null;
+}
+
+function tokenize(text) {
+  var words = String(text).toLowerCase().match(/[a-z0-9]+/g) || [];
+  return words.filter(function (w) { return w.length > 2 && STOPWORDS.indexOf(w) === -1; });
+}
+
+function bigrams(s) {
+  var out = {};
+  for (var i = 0; i < s.length - 1; i++) {
+    var g = s.slice(i, i + 2);
+    out[g] = (out[g] || 0) + 1;
+  }
+  return out;
+}
+
+function bigramSimilarity(a, b) {
+  if (a === b) return 1;
+  var ba = bigrams(a), bb = bigrams(b);
+  var shared = 0, ca = 0, cb = 0, k;
+  for (k in ba) { ca += ba[k]; if (bb[k]) shared += Math.min(ba[k], bb[k]); }
+  for (k in bb) { cb += bb[k]; }
+  if (ca === 0 || cb === 0) return 0;
+  return (2 * shared) / (ca + cb);
+}
+
+function tokensMatch(a, b) {
+  if (a === b) return true;
+  var sa = SYNONYMS[a], sb = SYNONYMS[b];
+  if (sa && sb && sa === sb) return true;
+  var longer = a.length >= b.length ? a : b;
+  var shorter = a.length >= b.length ? b : a;
+  if (shorter.length >= 3 && (longer.indexOf(shorter) === 0 || longer.indexOf(shorter) === longer.length - shorter.length)) return true;
+  if (a.length >= 4 && b.length >= 4 && bigramSimilarity(a, b) >= 0.55) return true;
+  return false;
+}
+
+function similarity(newDesc, newColor, it) {
+  var score = 0;
+  var itemColor = it.color || colorFromText(it.item || '');
+  if (newColor && itemColor && newColor === itemColor) score += 4;
+  var a = tokenize(newDesc);
+  var b = tokenize(it.item || '');
+  var shared = 0;
+  for (var i = 0; i < a.length; i++) {
+    for (var j = 0; j < b.length; j++) {
+      if (tokensMatch(a[i], b[j])) { shared++; break; }
+    }
+  }
+  if (shared > 0) score += shared * 3;
+  if (newColor && (it.item || '').toLowerCase().indexOf(newColor) !== -1) score += 2;
+  return score;
+}
+
+function replyItem(r) {
+  return (
+    '<div class="reply">' +
+      (r.image ? '<img class="reply-img" src="' + r.image + '" alt="">' : '') +
+      '<div class="reply-body">' +
+        '<div class="reply-meta"><strong>' + escapeHtml(r.name) + '</strong> &middot; ' + timeAgo(r.createdAt) + '</div>' +
+        '<div class="reply-msg">' + escapeHtml(r.message) + '</div>' +
+      '</div>' +
+    '</div>'
+  );
+}
+
+function lostCard(it) {
+  var badge = it.found ? '<span class="badge resolved">Found</span>' : '<span class="badge lost">Lost</span>';
+  var actionLabel = it.found ? '&#8617; Mark lost' : '&#10003; Mark found';
+  var owns = localStorage.getItem('lf-author-' + it.id) !== null;
+  var canManage = owns || isAdmin();
+  var replies = it.replies || [];
+  var repliesHtml = replies.length ? '<div class="replies">' + replies.map(replyItem).join('') + '</div>' : '';
+  var savedName = localStorage.getItem('lf-name') || '';
+  return (
+    '<li class="item lost-item' + (it.found ? ' found' : '') + '">' +
+      '<div class="item-main">' +
+        '<div class="item-row">' +
+          '<div class="item-info">' +
+            '<h3>' + escapeHtml(it.item) + '</h3>' +
+            '<p class="owner">' + escapeHtml(it.name) + ' &middot; ' + timeAgo(it.createdAt) + '</p>' +
+            (it.image ? '<img class="lost-img" src="' + it.image + '" alt="">' : '') +
+          '</div>' +
+          '<div class="item-actions">' +
+            badge +
+            (canManage ? '<button class="btn-small" data-id="' + it.id + '">' + actionLabel + '</button>' : '') +
+            '<button class="btn-delete" data-id="' + it.id + '" title="Remove">&#10005;</button>' +
+          '</div>' +
+        '</div>' +
+        repliesHtml +
+        '<button class="btn-reply" data-id="' + it.id + '">&#128172; Reply</button>' +
+        '<div class="reply-form hidden">' +
+          '<input class="reply-name" type="text" placeholder="Your name" value="' + escapeHtml(savedName) + '">' +
+          '<textarea class="reply-msg-input" placeholder="I found it, or any info&hellip;"></textarea>' +
+          '<div class="reply-form-row">' +
+            '<label class="upload-btn" for="reply-image-' + it.id + '">&#128247; Upload image</label>' +
+            '<input id="reply-image-' + it.id + '" class="reply-image" type="file" accept="image/*">' +
+            '<span class="reply-img-preview hidden"></span>' +
+            '<button class="btn-reply-submit" data-id="' + it.id + '">Post reply</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</li>'
+  );
+}
+
+function render() {
+  var lost = items.filter(function (it) { return it.type !== 'found'; });
+  var lostList = document.getElementById('lost-list');
+  if (lost.length === 0) {
+    lostList.innerHTML = '<li class="empty">No lost reports yet.</li>';
+  } else {
+    lostList.innerHTML = lost.map(lostCard).join('');
+  }
+}
+
+function matchCard(it) {
+  var claimed = it.found;
+  return (
+    '<div class="photo-card' + (claimed ? ' claimed' : '') + '">' +
+      '<img class="photo-card-img" src="' + it.image + '" alt="' + escapeHtml(it.item) + '">' +
+      '<div class="photo-card-body">' +
+        '<div class="photo-card-title">' + escapeHtml(it.item) + (claimed ? ' <span class="badge-claimed">claimed</span>' : '') + '</div>' +
+        (it.color ? '<div class="photo-card-color"><span class="color-dot" style="background:' + (COLOR_HEX[it.color] || '#ccc') + '"></span>' + it.color + '</div>' : '') +
+        '<button class="btn-mine" data-id="' + it.id + '">' + (claimed ? '&#8617; Undo claim' : 'That&#39;s mine &#10003;') + '</button>' +
+      '</div>' +
+    '</div>'
+  );
+}
+
+function renderMatches() {
+  var q = document.getElementById('search-input').value.trim();
+  var color = colorFromText(q);
+  var panel = document.getElementById('matches');
+  if (!q) { panel.classList.add('hidden'); panel.innerHTML = ''; return; }
+
+  var results = items
+    .filter(function (it) { return it.type === 'found'; })
+    .map(function (it) { return { it: it, score: similarity(q, color, it) }; })
+    .filter(function (r) { return r.score > 0; })
+    .sort(function (a, b) { return b.score - a.score; })
+    .slice(0, 12);
+
+  if (results.length === 0) {
+    panel.innerHTML = '<div class="matches-head">No matches</div><p class="matches-sub-empty">Nothing in the box for &ldquo;' + escapeHtml(q) + '&rdquo;.</p>';
+  } else {
+    var html = '<div class="matches-head">Did you see it here? &#128064;</div><p class="matches-sub">' + results.length + ' possible match' + (results.length === 1 ? '' : 'es') + '.</p>';
+    html += '<div class="photo-grid">' + results.map(function (r) { return matchCard(r.it); }).join('') + '</div>';
+    panel.innerHTML = html;
+  }
+  panel.classList.remove('hidden');
+}
+
+function loadItems() {
+  fetch('/api/items')
+    .then(function (r) { return r.json(); })
+    .then(function (data) { items = data || []; render(); })
+    .catch(function () { document.getElementById('lost-list').innerHTML = '<li class="empty">Could not load. Is the server running?</li>'; });
+}
+
+function submitItem(e) {
+  e.preventDefault();
+  var name = document.getElementById('name').value.trim();
+  var item = document.getElementById('item').value.trim();
+  if (!name || !item) { showToast('Please enter both your name and the item.'); return; }
+  var color = colorFromText(item);
+  fetch('/api/items', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Client-Id': clientId },
+    body: JSON.stringify({ name: name, item: item, type: 'lost', color: color, image: pendingReportImage })
+  })
+    .then(function (r) {
+      if (r.status === 429) { showToast('Cooldown is on — please wait a few minutes.'); return null; }
+      return r.json();
+    })
+    .then(function (entry) {
+      if (!entry) return;
+      items.unshift(entry);
+      localStorage.setItem('lf-name', name);
+      if (entry.authorToken) localStorage.setItem('lf-author-' + entry.id, entry.authorToken);
+      document.getElementById('item').value = '';
+      clearReportPhoto();
+      render();
+    })
+    .catch(function () { showToast('Could not save. Is the server running?'); });
+}
+
+function toggleFound(id) {
+  var token = localStorage.getItem('lf-author-' + id);
+  fetch('/api/items/' + id + '/found', {
+    method: 'POST',
+    headers: { 'X-Admin-Pass': adminPass || '', 'X-Author-Token': token || '' }
+  })
+    .then(function (r) {
+      if (r.status === 403) { showToast('Only the person who posted this can mark it found.'); return null; }
+      return r.json();
+    })
+    .then(function (updated) {
+      if (updated) {
+        items = items.map(function (it) { return it.id === updated.id ? updated : it; });
+        render();
+        renderMatches();
+      }
+    });
+}
+
+function deleteItem(id) {
+  if (!confirm('Remove this item?')) return;
+  var token = localStorage.getItem('lf-author-' + id);
+  fetch('/api/items/' + id, {
+    method: 'DELETE',
+    headers: { 'X-Admin-Pass': adminPass || '', 'X-Author-Token': token || '' }
+  })
+    .then(function (r) {
+      if (r.status === 403) { showToast('You can only delete your own item.'); return null; }
+      return r.json();
+    })
+    .then(function (res) {
+      if (res && res.ok) { items = items.filter(function (it) { return it.id !== id; }); render(); renderMatches(); }
+    });
+}
+
+function downscaleImage(file, cb) {
+  var reader = new FileReader();
+  reader.onload = function () {
+    var img = new Image();
+    img.onload = function () {
+      var max = 800;
+      var scale = Math.min(1, max / Math.max(img.width, img.height));
+      var cw = Math.max(1, Math.round(img.width * scale));
+      var ch = Math.max(1, Math.round(img.height * scale));
+      var canvas = document.createElement('canvas');
+      canvas.width = cw; canvas.height = ch;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, cw, ch);
+      cb(canvas.toDataURL('image/jpeg', 0.82));
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function postReply(id, name, message, image) {
+  fetch('/api/items/' + id + '/replies', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Client-Id': clientId },
+    body: JSON.stringify({ name: name, message: message, image: image })
+  })
+    .then(function (r) {
+      if (r.status === 429) { showToast('Cooldown is on — please wait a few minutes.'); return null; }
+      return r.json();
+    })
+    .then(function (updated) {
+      if (!updated) return;
+      items = items.map(function (it) { return it.id === updated.id ? updated : it; });
+      render();
+    })
+    .catch(function () { showToast('Could not post reply.'); });
+}
+
+document.getElementById('search-input').addEventListener('input', renderMatches);
+document.getElementById('form').addEventListener('submit', submitItem);
+document.getElementById('report-photo').addEventListener('change', function (e) {
+  var file = e.target.files && e.target.files[0];
+  if (!file) return;
+  downscaleImage(file, function (dataUrl) {
+    pendingReportImage = dataUrl;
+    var pv = document.getElementById('report-photo-preview');
+    pv.innerHTML = '<img src="' + dataUrl + '" alt="">';
+    pv.classList.remove('hidden');
+  });
+});
+
+function clearReportPhoto() {
+  pendingReportImage = null;
+  document.getElementById('report-photo').value = '';
+  var pv = document.getElementById('report-photo-preview');
+  pv.innerHTML = '';
+  pv.classList.add('hidden');
+}
+document.getElementById('lost-list').addEventListener('click', function (e) {
+  var replyImg = e.target.closest('.reply-img');
+  if (replyImg) { openLightbox(replyImg.getAttribute('src')); return; }
+  var lostImg = e.target.closest('.lost-img');
+  if (lostImg) { openLightbox(lostImg.getAttribute('src')); return; }
+  var btn = e.target.closest('button');
+  if (!btn) return;
+  var id = btn.getAttribute('data-id');
+  if (btn.classList.contains('btn-small')) { burstOnClaim(e, id); toggleFound(id); return; }
+  if (btn.classList.contains('btn-delete')) {
+    if (!canDelete(id)) { showToast("You can't delete other people's posts."); return; }
+    deleteItem(id);
+    return;
+  }
+  if (btn.classList.contains('btn-reply')) {
+    btn.closest('.lost-item').querySelector('.reply-form').classList.remove('hidden');
+    return;
+  }
+  if (btn.classList.contains('btn-reply-submit')) {
+    var card = btn.closest('.lost-item');
+    var name = card.querySelector('.reply-name').value.trim();
+    var msg = card.querySelector('.reply-msg-input').value.trim();
+    var image = card.dataset.replyImage || null;
+    if (!msg) { showToast('Please enter a message.'); return; }
+    postReply(id, name, msg, image);
+  }
+});
+document.getElementById('lost-list').addEventListener('change', function (e) {
+  if (e.target.classList.contains('reply-image')) {
+    var file = e.target.files && e.target.files[0];
+    var card = e.target.closest('.lost-item');
+    if (file) {
+      downscaleImage(file, function (dataUrl) {
+        card.dataset.replyImage = dataUrl;
+        var preview = card.querySelector('.reply-img-preview');
+        preview.innerHTML = '<img src="' + dataUrl + '" alt="">';
+        preview.classList.remove('hidden');
+      });
+    }
+  }
+});
+document.getElementById('matches').addEventListener('click', function (e) {
+  var img = e.target.closest('.photo-card-img');
+  if (img) { openLightbox(img.getAttribute('src')); return; }
+  var btn = e.target.closest('.btn-mine');
+  if (btn) { burstOnClaim(e, btn.getAttribute('data-id')); toggleFound(btn.getAttribute('data-id')); }
+});
+
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.remove('hidden');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.add('hidden');
+}
+
+function showToast(message) {
+  var old = document.getElementById('toast');
+  if (old) old.remove();
+  var el = document.createElement('div');
+  el.id = 'toast';
+  el.className = 'toast';
+  el.textContent = message;
+  document.body.appendChild(el);
+  setTimeout(function () { el.classList.add('show'); }, 10);
+  setTimeout(function () {
+    el.classList.remove('show');
+    setTimeout(function () { el.remove(); }, 300);
+  }, 2600);
+}
+document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+document.getElementById('lightbox').addEventListener('click', function (e) {
+  if (e.target === this) closeLightbox();
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeLightbox();
+});
+
+function burst(x, y) {
+  var el = document.createElement('div');
+  el.className = 'burst';
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  el.innerHTML = '<span class="burst-ring"></span><span class="burst-ring2"></span><span class="burst-check">&#10003;</span>';
+  document.body.appendChild(el);
+  setTimeout(function () { el.remove(); }, 800);
+}
+function burstOnClaim(e, id) {
+  var it = null;
+  for (var i = 0; i < items.length; i++) { if (items[i].id === id) { it = items[i]; break; } }
+  if (it && !it.found) burst(e.clientX, e.clientY);
+}
+
+function applyTheme() {
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.getElementById('theme-toggle').innerHTML = isDark ? '&#9728;&#65039;' : '&#127769;';
+}
+document.getElementById('theme-toggle').addEventListener('click', function () {
+  var cur = document.documentElement.getAttribute('data-theme');
+  var next = (cur === 'dark') ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('lf-theme', next); } catch (e) {}
+  applyTheme();
+});
+applyTheme();
+
+var adminPass = localStorage.getItem('lf-admin') || null;
+var cooldownOn = false;
+function isAdmin() { return !!adminPass; }
+function ownsItem(id) { return localStorage.getItem('lf-author-' + id) !== null; }
+function canDelete(id) { return isAdmin() || ownsItem(id); }
+
+function refreshAdminUI() {
+  document.getElementById('admin-btn').classList.toggle('active', isAdmin());
+  var cb = document.getElementById('cooldown-btn');
+  cb.classList.toggle('hidden', !isAdmin());
+  cb.textContent = cooldownOn ? 'Cooldown: ON' : 'Cooldown: OFF';
+  cb.classList.toggle('active', cooldownOn);
+  document.getElementById('dashboard-btn').classList.toggle('hidden', !isAdmin());
+  document.getElementById('abuse-btn').classList.toggle('hidden', !isAdmin());
+  if (!isAdmin()) document.getElementById('admin-dashboard').classList.add('hidden');
+}
+
+function animateCount(el, target) {
+  var start = 0;
+  var dur = 500;
+  var t0 = performance.now();
+  function step(now) {
+    var p = Math.min(1, (now - t0) / dur);
+    var eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(start + (target - start) * eased);
+    if (p < 1) { requestAnimationFrame(step); } else { el.textContent = target; }
+  }
+  requestAnimationFrame(step);
+}
+
+function updateStats() {
+  var found = items.filter(function (it) { return it.type === 'found'; });
+  var claimed = 0;
+  for (var i = 0; i < found.length; i++) { if (found[i].found) claimed++; }
+  var lost = items.filter(function (it) { return it.type !== 'found'; });
+  var replies = 0;
+  for (var j = 0; j < items.length; j++) { if (items[j].replies) replies += items[j].replies.length; }
+  animateCount(document.getElementById('stat-total'), items.length);
+  animateCount(document.getElementById('stat-available'), found.length - claimed);
+  animateCount(document.getElementById('stat-claimed'), claimed);
+  animateCount(document.getElementById('stat-lost'), lost.length);
+  animateCount(document.getElementById('stat-replies'), replies);
+}
+
+function loadActivity() {
+  fetch('/api/activity')
+    .then(function (r) { return r.json(); })
+    .then(function (acts) {
+      var feed = document.getElementById('activity-feed');
+      if (!acts || !acts.length) {
+        feed.innerHTML = '<li class="empty">No activity yet.</li>';
+        return;
+      }
+      feed.innerHTML = acts.map(function (a) {
+        var dot = (a.type === 'claim') ? 'claim' : ((a.type === 'delete') ? 'delete' : ((a.type === 'reply') ? 'reply' : 'post'));
+        return '<li class="activity-item"><span class="activity-dot ' + dot + '"></span><span class="activity-text">' + escapeHtml(a.text) + '</span><span class="activity-time">' + timeAgo(a.time) + '</span></li>';
+      }).join('');
+    })
+    .catch(function () {});
+}
+
+function refreshDashboard() {
+  if (!isAdmin()) return;
+  updateStats();
+  loadActivity();
+}
+function openAdminModal() {
+  document.getElementById('admin-pass-input').value = '';
+  document.getElementById('admin-modal').classList.remove('hidden');
+  document.getElementById('admin-pass-input').focus();
+}
+function closeAdminModal() {
+  document.getElementById('admin-modal').classList.add('hidden');
+}
+
+document.getElementById('admin-btn').addEventListener('click', function () {
+  if (isAdmin()) {
+    adminPass = null;
+    localStorage.removeItem('lf-admin');
+    refreshAdminUI();
+    render(); renderMatches();
+  } else {
+    openAdminModal();
+  }
+});
+document.getElementById('admin-cancel').addEventListener('click', closeAdminModal);
+document.getElementById('admin-unlock').addEventListener('click', function () {
+  var pass = document.getElementById('admin-pass-input').value;
+  if (!pass) { showToast('Enter the passcode.'); return; }
+  fetch('/api/admin-check', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pass: pass })
+  }).then(function (r) {
+    if (r.status === 200) {
+      adminPass = pass;
+      localStorage.setItem('lf-admin', pass);
+      closeAdminModal();
+      refreshAdminUI();
+      render(); renderMatches();
+    } else {
+      showToast('Wrong passcode.');
+    }
+  });
+});
+document.getElementById('admin-pass-input').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') document.getElementById('admin-unlock').click();
+});
+document.getElementById('cooldown-btn').addEventListener('click', function () {
+  fetch('/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Pass': adminPass || '' },
+    body: JSON.stringify({ cooldown: !cooldownOn })
+  }).then(function (r) { return r.json(); }).then(function (s) {
+    cooldownOn = !!s.cooldown;
+    refreshAdminUI();
+    showToast(cooldownOn ? 'Cooldown ON — one post per 5 minutes.' : 'Cooldown OFF.');
+  }).catch(function () { showToast('Could not update cooldown.'); });
+});
+
+document.getElementById('dashboard-btn').addEventListener('click', function () {
+  document.getElementById('admin-dashboard').classList.remove('hidden');
+  refreshDashboard();
+});
+document.getElementById('dashboard-close').addEventListener('click', function () {
+  document.getElementById('admin-dashboard').classList.add('hidden');
+});
+document.getElementById('admin-dashboard').addEventListener('click', function (e) {
+  if (e.target === this) document.getElementById('admin-dashboard').classList.add('hidden');
+});
+
+document.getElementById('abuse-btn').addEventListener('click', function () {
+  document.getElementById('abuse-modal').classList.remove('hidden');
+});
+document.getElementById('abuse-close').addEventListener('click', function () {
+  document.getElementById('abuse-modal').classList.add('hidden');
+});
+document.getElementById('abuse-modal').addEventListener('click', function (e) {
+  if (e.target === this) { document.getElementById('abuse-modal').classList.add('hidden'); return; }
+  var btn = e.target.closest('.abuse-btn');
+  if (btn) {
+    runEffect(btn.getAttribute('data-effect'));
+    document.getElementById('abuse-modal').classList.add('hidden');
+  }
+});
+
+function runEffect(effect) {
+  if (effect === 'meteor') strikeMeteor();
+  else if (effect === 'nuke') nuke();
+  else if (effect === 'tsunami') tsunami();
+  else if (effect === 'spacebattle') spaceBattle();
+  else if (effect === 'penguins') penguins();
+  else if (effect === 'disco') disco();
+  else if (effect === 'everything') everything();
+}
+
+function boomWord() {
+  var boom = document.createElement('div');
+  boom.className = 'boom-text';
+  boom.textContent = 'BOOM!';
+  document.body.appendChild(boom);
+  setTimeout(function () { boom.remove(); }, 1300);
+}
+
+function spawnSpark(color, distMin, distMax) {
+  var s = document.createElement('div');
+  s.className = 'spark';
+  var angle = Math.random() * Math.PI * 2;
+  var dist = (distMin || 120) + Math.random() * ((distMax || 320) - (distMin || 120));
+  s.style.background = color;
+  s.style.setProperty('--dx', (Math.cos(angle) * dist).toFixed(0) + 'px');
+  s.style.setProperty('--dy', (Math.sin(angle) * dist).toFixed(0) + 'px');
+  document.body.appendChild(s);
+  setTimeout(function () { s.remove(); }, 1000);
+}
+
+function spawnSmoke() {
+  for (var i = 0; i < 8; i++) {
+    var sm = document.createElement('div');
+    sm.className = 'smoke';
+    var size = 50 + Math.random() * 70;
+    sm.style.width = size + 'px';
+    sm.style.height = size + 'px';
+    sm.style.setProperty('--sx', ((Math.random() - .5) * 160).toFixed(0) + 'px');
+    sm.style.setProperty('--sy', ((Math.random() - .5) * 120).toFixed(0) + 'px');
+    document.body.appendChild(sm);
+    setTimeout(function () { sm.remove(); }, 1600);
+  }
+}
+
+function strikeMeteor() {
+  if (typeof THREE !== 'undefined') { strikeMeteor3D(); }
+  else { strikeMeteorCSS(); }
+}
+
+function strikeMeteorCSS() {
+  var meteor = document.createElement('div');
+  meteor.className = 'meteor';
+  meteor.innerHTML = '<div class="glow"></div><div class="tail"></div><div class="rock"></div>';
+  document.body.appendChild(meteor);
+  setTimeout(function () { meteor.remove(); explode(); }, 1200);
+}
+
+function makeGlowTexture() {
+  var c = document.createElement('canvas');
+  c.width = 128; c.height = 128;
+  var ctx = c.getContext('2d');
+  var g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.3, 'rgba(255,200,50,.9)');
+  g.addColorStop(0.7, 'rgba(255,120,0,.4)');
+  g.addColorStop(1, 'rgba(255,80,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+}
+
+function makeFlameTexture() {
+  var c = document.createElement('canvas');
+  c.width = 64; c.height = 128;
+  var ctx = c.getContext('2d');
+  var g = ctx.createLinearGradient(0, 128, 0, 0);
+  g.addColorStop(0, 'rgba(255,80,0,0)');
+  g.addColorStop(0.4, 'rgba(220,38,38,.9)');
+  g.addColorStop(0.7, 'rgba(249,115,22,.95)');
+  g.addColorStop(0.9, 'rgba(251,191,36,.95)');
+  g.addColorStop(1, 'rgba(253,224,71,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.moveTo(32, 0);
+  ctx.bezierCurveTo(54, 40, 54, 96, 32, 128);
+  ctx.bezierCurveTo(10, 96, 10, 40, 32, 0);
+  ctx.closePath();
+  ctx.fill();
+  return new THREE.CanvasTexture(c);
+}
+
+function run3D(duration, setup, animate, onDone) {
+  var overlay = document.createElement('div');
+  overlay.className = 'meteor3d';
+  document.body.appendChild(overlay);
+  var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  overlay.appendChild(renderer.domElement);
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.z = 10;
+  setup(scene, camera);
+  var t0 = performance.now();
+  function frame(now) {
+    var t = Math.min(1, (now - t0) / duration);
+    animate(scene, camera, t, now);
+    renderer.render(scene, camera);
+    if (t < 1) { requestAnimationFrame(frame); }
+    else { renderer.dispose(); overlay.remove(); if (onDone) onDone(); }
+  }
+  requestAnimationFrame(frame);
+}
+
+function fire3D() {
+  run3D(3000, function (scene) {
+    var flameTex = makeFlameTexture();
+    var flames = [];
+    for (var f = 0; f < 20; f++) {
+      var fsp = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex, blending: THREE.AdditiveBlending, transparent: true, opacity: 0.85, depthWrite: false }));
+      var fx = (Math.random() - 0.5) * 15;
+      var fh = 3.5 + Math.random() * 3.5;
+      fsp.position.set(fx, -4.5, (Math.random() - 0.5) * 1.5);
+      fsp.scale.set(1.2 + Math.random() * 1.4, fh, 1);
+      fsp.userData = { ph: Math.random() * 6.28, maxH: fh, baseX: fx };
+      scene.add(fsp);
+      flames.push(fsp);
+    }
+    var count = 180;
+    var pos = new Float32Array(count * 3);
+    var col = new Float32Array(count * 3);
+    for (var i = 0; i < count; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 15;
+      pos[i * 3 + 1] = -4.5 + Math.random() * 8;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 2;
+      var c = new THREE.Color().setHSL(0.04 + Math.random() * 0.1, 1, 0.5 + Math.random() * 0.4);
+      col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
+    }
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    var mat = new THREE.PointsMaterial({ size: 0.22, vertexColors: true, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false });
+    var pts = new THREE.Points(geo, mat);
+    scene.add(pts);
+    scene.userData = { pos: pos, pts: pts, flames: flames };
+  }, function (scene, camera, t, now) {
+    var pos = scene.userData.pos;
+    var n = pos.length / 3;
+    for (var i = 0; i < n; i++) {
+      pos[i * 3 + 1] += 0.03;
+      pos[i * 3] += Math.sin(now * 0.0012 + i) * 0.008;
+      if (pos[i * 3 + 1] > 5) { pos[i * 3 + 1] = -4.5; pos[i * 3] = (Math.random() - 0.5) * 15; }
+    }
+    scene.userData.pts.geometry.attributes.position.needsUpdate = true;
+    var fade = t > 0.7 ? (1 - t) / 0.3 : 1;
+    var flames = scene.userData.flames;
+    for (var f = 0; f < flames.length; f++) {
+      var fsp = flames[f];
+      fsp.scale.y = fsp.userData.maxH * (0.6 + Math.sin(now * 0.012 + fsp.userData.ph) * 0.25);
+      fsp.position.x = fsp.userData.baseX + Math.sin(now * 0.008 + fsp.userData.ph) * 0.3;
+      fsp.material.opacity = (0.7 + Math.sin(now * 0.02 + fsp.userData.ph) * 0.2) * fade;
+    }
+    scene.userData.pts.material.opacity = 0.95 * fade;
+  });
+}
+
+function nuke3D() {
+  run3D(1800, function (scene) {
+    scene.add(new THREE.AmbientLight(0xffb300, 1.2));
+    var pl = new THREE.PointLight(0xffb300, 8, 40, 1.2);
+    pl.position.set(0, 0, 4);
+    scene.add(pl);
+    var fireball = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: 1, blending: THREE.AdditiveBlending, depthWrite: false }));
+    scene.add(fireball);
+    var core = new THREE.Mesh(new THREE.SphereGeometry(0.36, 24, 24), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1, blending: THREE.AdditiveBlending, depthWrite: false }));
+    scene.add(core);
+    var ringGeo = new THREE.TorusGeometry(1, 0.08, 16, 64);
+    var rings = [];
+    for (var r = 0; r < 3; r++) {
+      var ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+      ring.rotation.x = Math.PI / 2;
+      scene.add(ring);
+      rings.push(ring);
+    }
+    var count = 300;
+    var pos = new Float32Array(count * 3);
+    var vel = new Float32Array(count * 3);
+    for (var i = 0; i < count; i++) {
+      pos[i * 3] = 0; pos[i * 3 + 1] = 0; pos[i * 3 + 2] = 0;
+      var th = Math.random() * Math.PI * 2;
+      var ph = Math.acos(2 * Math.random() - 1);
+      var sp = 4 + Math.random() * 8;
+      vel[i * 3] = Math.sin(ph) * Math.cos(th) * sp;
+      vel[i * 3 + 1] = Math.sin(ph) * Math.sin(th) * sp;
+      vel[i * 3 + 2] = Math.cos(ph) * sp;
+    }
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    var mat = new THREE.PointsMaterial({ size: 0.16, color: 0xffaa33, transparent: true, opacity: 1, blending: THREE.AdditiveBlending, depthWrite: false });
+    var pts = new THREE.Points(geo, mat);
+    scene.add(pts);
+    scene.userData = { fireball: fireball, core: core, rings: rings, pos: pos, vel: vel, pts: pts };
+  }, function (scene, camera, t) {
+    var u = scene.userData;
+    u.fireball.scale.setScalar(1 + t * 6);
+    u.fireball.material.opacity = t < 0.5 ? 1 : (1 - t) * 2;
+    u.core.scale.setScalar(1 + t * 4);
+    u.core.material.opacity = t < 0.3 ? 1 : (1 - t) * 1.5;
+    for (var r = 0; r < u.rings.length; r++) {
+      var rt = Math.max(0, t - r * 0.12);
+      u.rings[r].scale.setScalar(1 + rt * 10);
+      u.rings[r].material.opacity = Math.max(0, 1 - rt * 1.2);
+    }
+    for (var i = 0; i < u.pos.length / 3; i++) {
+      u.pos[i * 3] += u.vel[i * 3] * 0.02;
+      u.pos[i * 3 + 1] += u.vel[i * 3 + 1] * 0.02;
+      u.pos[i * 3 + 2] += u.vel[i * 3 + 2] * 0.02;
+    }
+    u.pts.geometry.attributes.position.needsUpdate = true;
+    u.pts.material.opacity = t < 0.6 ? 1 : (1 - t) / 0.4;
+  });
+}
+
+function lightning3D() {
+  run3D(900, function (scene) {
+    scene.add(new THREE.AmbientLight(0xfff3b0, 1.4));
+    var glowLight = new THREE.PointLight(0xffe94d, 6, 30, 1.5);
+    glowLight.position.set(0, 0, 4);
+    scene.add(glowLight);
+    var bolts = [];
+    for (var b = 0; b < 5; b++) {
+      var pts = [];
+      var x = (Math.random() - 0.5) * 14;
+      var y = 5;
+      pts.push(new THREE.Vector3(x, y, 0));
+      while (y > -5) {
+        y -= 0.25 + Math.random() * 0.5;
+        x += (Math.random() - 0.5) * 1.4;
+        pts.push(new THREE.Vector3(x, y, 0));
+      }
+      var geo = new THREE.BufferGeometry().setFromPoints(pts);
+      var mat = new THREE.LineBasicMaterial({ color: 0xffe94d, transparent: true, opacity: 1, blending: THREE.AdditiveBlending, depthWrite: false });
+      var line = new THREE.Line(geo, mat);
+      scene.add(line);
+      bolts.push(line);
+    }
+    scene.userData = { bolts: bolts, glowLight: glowLight };
+  }, function (scene, camera, t) {
+    var bolts = scene.userData.bolts;
+    for (var b = 0; b < bolts.length; b++) {
+      bolts[b].visible = (Math.floor(t * 8) + b) % 3 !== 0;
+      bolts[b].material.opacity = 0.6 + Math.random() * 0.4;
+    }
+    scene.userData.glowLight.intensity = 3 + Math.random() * 6;
+  });
+}
+
+function strikeMeteor3D() {
+  var overlay = document.createElement('div');
+  overlay.className = 'meteor3d';
+  document.body.appendChild(overlay);
+
+  var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  overlay.appendChild(renderer.domElement);
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.z = 9;
+
+  scene.add(new THREE.AmbientLight(0x666666));
+  var key = new THREE.DirectionalLight(0xfff2d9, 1.4);
+  key.position.set(-4, 6, 5);
+  scene.add(key);
+  var fireLight = new THREE.PointLight(0xff7b00, 3.5, 25, 1.5);
+  scene.add(fireLight);
+
+  var geo = new THREE.IcosahedronGeometry(1.3, 5);
+  var pos = geo.attributes.position;
+  for (var i = 0; i < pos.count; i++) {
+    var x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+    var len = Math.sqrt(x * x + y * y + z * z) || 1;
+    var n = (Math.random() - 0.5) * 0.5;
+    pos.setXYZ(i, x + (x / len) * n, y + (y / len) * n, z + (z / len) * n);
+  }
+  geo.computeVertexNormals();
+  var rock = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x3d3732, roughness: 0.9, metalness: 0.08, flatShading: true }));
+  scene.add(rock);
+
+  var glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeGlowTexture(), color: 0xff7b00, blending: THREE.AdditiveBlending, transparent: true, opacity: 0.95, depthWrite: false }));
+  glow.scale.set(6.5, 6.5, 1);
+  scene.add(glow);
+
+  var trail = [];
+  for (var s = 0; s < 9; s++) {
+    var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeGlowTexture(), color: s < 3 ? 0xffd166 : 0xff7b00, blending: THREE.AdditiveBlending, transparent: true, opacity: 1 - s * 0.1, depthWrite: false }));
+    var sz = 2.4 - s * 0.22;
+    sp.scale.set(sz, sz, 1);
+    scene.add(sp);
+    trail.push(sp);
+  }
+
+  var debris = [];
+  for (var d = 0; d < 50; d++) {
+    var dg = new THREE.SphereGeometry(0.03 + Math.random() * 0.06, 6, 6);
+    var dm = new THREE.Mesh(dg, new THREE.MeshBasicMaterial({ color: 0xffb366, transparent: true, opacity: 0.9 }));
+    dm.userData = { ox: (Math.random() - 0.5) * 2, oy: (Math.random() - 0.5) * 2, oz: (Math.random() - 0.5) * 2, ph: Math.random() * 6.28 };
+    scene.add(dm);
+    debris.push(dm);
+  }
+
+  rock.position.x = -7;
+  rock.position.y = 8;
+  var t0 = performance.now();
+  var dur = 1300;
+
+  function frame(now) {
+    var t = Math.min(1, (now - t0) / dur);
+    var y = 8 - (t * t) * 8;
+    var x = -7 + t * 10;
+    rock.position.x = x;
+    rock.position.y = y;
+    rock.rotation.x += 0.04;
+    rock.rotation.y += 0.055;
+    glow.position.set(x, y, 0);
+    for (var s = 0; s < trail.length; s++) {
+      trail[s].position.set(x, y + 1.6 + s * 0.85, 0);
+      trail[s].material.opacity = (1 - s * 0.1) * (0.6 + Math.sin(now * 0.02 + s) * 0.25);
+    }
+    fireLight.position.set(x * 0.3, y - 1.4, 4);
+    for (var k = 0; k < debris.length; k++) {
+      var dm = debris[k];
+      dm.position.set(x + dm.userData.ox, y + dm.userData.oy + Math.sin(now * 0.009 + dm.userData.ph) * 0.4, dm.userData.oz);
+      dm.rotation.x += 0.05;
+      dm.rotation.y += 0.07;
+    }
+    renderer.render(scene, camera);
+    if (t < 1) { requestAnimationFrame(frame); }
+    else { renderer.dispose(); overlay.remove(); explode(); }
+  }
+  requestAnimationFrame(frame);
+}
+
+function explode() {
+  document.body.classList.add('shake-big');
+  setTimeout(function () { document.body.classList.remove('shake-big'); }, 900);
+  var flash = document.createElement('div');
+  flash.className = 'explosion-flash';
+  document.body.appendChild(flash);
+  setTimeout(function () { flash.remove(); }, 500);
+  if (typeof THREE !== 'undefined') { fire3D(); } else { fire(); }
+  spawnSmoke();
+}
+
+function fire() {
+  var glow = document.createElement('div');
+  glow.className = 'fire-glow';
+  document.body.appendChild(glow);
+  setTimeout(function () { glow.remove(); }, 4100);
+
+  for (var i = 0; i < 30; i++) {
+    (function () {
+      var delay = Math.random() * 1100;
+      setTimeout(function () {
+        var f = document.createElement('div');
+        f.className = 'flame';
+        f.style.left = (Math.random() * 100) + 'vw';
+        var w = 36 + Math.random() * 70;
+        var h = 70 + Math.random() * 170;
+        f.style.width = w + 'px';
+        f.style.height = h + 'px';
+        document.body.appendChild(f);
+        setTimeout(function () { f.remove(); }, 2900);
+      }, delay);
+    })();
+  }
+
+  for (var j = 0; j < 45; j++) {
+    (function () {
+      var e = document.createElement('div');
+      e.className = 'ember';
+      e.style.left = (Math.random() * 100) + 'vw';
+      e.style.animationDuration = (1 + Math.random() * 1.4) + 's';
+      e.style.animationDelay = (0.4 + Math.random() * 0.7) + 's';
+      e.style.setProperty('--ex', ((Math.random() - .5) * 220).toFixed(0) + 'px');
+      document.body.appendChild(e);
+      setTimeout(function () { e.remove(); }, 3000);
+    })();
+  }
+}
+
+function nuke() {
+  if (typeof THREE !== 'undefined') { nuke3D(); return; }
+  document.body.classList.add('shake-big');
+  setTimeout(function () { document.body.classList.remove('shake-big'); }, 900);
+  var flash = document.createElement('div');
+  flash.className = 'nuke-flash';
+  document.body.appendChild(flash);
+  setTimeout(function () { flash.remove(); }, 1000);
+  var fb = document.createElement('div');
+  fb.className = 'nuke-fireball';
+  document.body.appendChild(fb);
+  setTimeout(function () { fb.remove(); }, 1500);
+  for (var i = 0; i < 5; i++) {
+    (function (d) {
+      setTimeout(function () {
+        var ring = document.createElement('div');
+        ring.className = 'shockwave';
+        document.body.appendChild(ring);
+        setTimeout(function () { ring.remove(); }, 1000);
+      }, d);
+    })(i * 140);
+  }
+  var colors = ['#fff', '#fde047', '#f97316', '#ef4444'];
+  for (var j = 0; j < 100; j++) { spawnSpark(colors[j % colors.length], 150, 600); }
+  spawnSmoke();
+  boomWord();
+}
+
+function fireworks() {
+  var fwColors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#f43f5e', '#14b8a6'];
+  for (var b = 0; b < 9; b++) {
+    (function () {
+      var x = 10 + Math.random() * 80;
+      var y = 12 + Math.random() * 50;
+      var color = fwColors[Math.floor(Math.random() * fwColors.length)];
+      setTimeout(function () {
+        var flash = document.createElement('div');
+        flash.className = 'fw-flash';
+        flash.style.left = x + 'vw';
+        flash.style.top = y + 'vh';
+        document.body.appendChild(flash);
+        setTimeout(function () { flash.remove(); }, 500);
+        for (var i = 0; i < 55; i++) {
+          var s = document.createElement('div');
+          s.className = 'fw-spark';
+          s.style.left = x + 'vw';
+          s.style.top = y + 'vh';
+          s.style.background = color;
+          var angle = Math.random() * Math.PI * 2;
+          var dist = 50 + Math.random() * 160;
+          s.style.setProperty('--dx', (Math.cos(angle) * dist).toFixed(0) + 'px');
+          s.style.setProperty('--dy', (Math.sin(angle) * dist).toFixed(0) + 'px');
+          document.body.appendChild(s);
+          setTimeout(function () { s.remove(); }, 1000);
+        }
+      }, b * 200);
+    })();
+  }
+}
+
+function lightning() {
+  if (typeof THREE !== 'undefined') { lightning3D(); return; }
+  var flash = document.createElement('div');
+  flash.className = 'lightning-flash';
+  document.body.appendChild(flash);
+  setTimeout(function () { flash.remove(); }, 600);
+  document.body.classList.add('shake');
+  setTimeout(function () { document.body.classList.remove('shake'); }, 600);
+  for (var i = 0; i < 4; i++) {
+    (function (idx) {
+      setTimeout(function () {
+        var bolt = document.createElement('div');
+        bolt.className = 'bolt';
+        bolt.style.left = (8 + Math.random() * 84) + 'vw';
+        bolt.style.height = (35 + Math.random() * 30) + 'vh';
+        document.body.appendChild(bolt);
+        setTimeout(function () { bolt.remove(); }, 340);
+      }, idx * 170);
+    })(i);
+  }
+}
+
+function rain() {
+  for (var i = 0; i < 220; i++) {
+    var d = document.createElement('div');
+    d.className = 'rain-drop';
+    d.style.left = (Math.random() * 100) + 'vw';
+    d.style.animationDuration = (1.3 + Math.random() * 1.5) + 's';
+    d.style.animationDelay = (Math.random() * 8.5) + 's';
+    document.body.appendChild(d);
+    setTimeout(function () { d.remove(); }, 10000);
+  }
+}
+
+function snow() {
+  for (var i = 0; i < 80; i++) {
+    var s = document.createElement('div');
+    s.className = 'snowflake';
+    s.style.left = (Math.random() * 100) + 'vw';
+    var size = 5 + Math.random() * 8;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+    s.style.animationDelay = (Math.random() * 1.5) + 's';
+    s.style.setProperty('--sx', ((Math.random() - .5) * 80).toFixed(0) + 'px');
+    document.body.appendChild(s);
+    setTimeout(function () { s.remove(); }, 5000);
+  }
+}
+
+function confetti() {
+  var cc = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7', '#ec4899'];
+  for (var i = 0; i < 110; i++) {
+    var c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.left = (Math.random() * 100) + 'vw';
+    c.style.background = cc[Math.floor(Math.random() * cc.length)];
+    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    c.style.animationDelay = (Math.random() * 1.2) + 's';
+    c.style.setProperty('--sx', ((Math.random() - .5) * 160).toFixed(0) + 'px');
+    c.style.setProperty('--rot', ((Math.random() * 720 - 360).toFixed(0)) + 'deg');
+    document.body.appendChild(c);
+    setTimeout(function () { c.remove(); }, 4600);
+  }
+}
+
+function rainbow() {
+  var wrap = document.createElement('div');
+  wrap.className = 'rainbow-wrap';
+  var arc = document.createElement('div');
+  arc.className = 'rainbow-arc';
+  wrap.appendChild(arc);
+  document.body.appendChild(wrap);
+  setTimeout(function () { wrap.remove(); }, 3700);
+}
+
+function makeDiscoTexture() {
+  var c = document.createElement('canvas');
+  c.width = 256; c.height = 256;
+  var ctx = c.getContext('2d');
+  var cols = 16, rows = 16;
+  var tw = 256 / cols, th = 256 / rows;
+  for (var y = 0; y < rows; y++) {
+    for (var x = 0; x < cols; x++) {
+      var v = 120 + Math.random() * 100;
+      var tint = Math.random() * 10;
+      ctx.fillStyle = 'rgb(' + Math.round(v) + ',' + Math.round(v + tint) + ',' + Math.round(v + 14) + ')';
+      ctx.fillRect(x * tw, y * th, tw - 1, th - 1);
+    }
+  }
+  return new THREE.CanvasTexture(c);
+}
+
+function disco3D() {
+  var overlay = document.createElement('div');
+  overlay.className = 'meteor3d';
+  document.body.appendChild(overlay);
+
+  var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  overlay.appendChild(renderer.domElement);
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.z = 9;
+
+  var ballR = 1.0;
+  var ball = new THREE.Mesh(
+    new THREE.SphereGeometry(ballR, 48, 32),
+    new THREE.MeshPhongMaterial({ map: makeDiscoTexture(), specular: 0xffffff, shininess: 90 })
+  );
+  scene.add(ball);
+
+  var string = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.03, 0.03, 1, 8),
+    new THREE.MeshBasicMaterial({ color: 0xcccccc })
+  );
+  scene.add(string);
+
+  scene.add(new THREE.AmbientLight(0x888888, 1));
+  var key = new THREE.DirectionalLight(0xffffff, 1.2);
+  key.position.set(3, 5, 6);
+  scene.add(key);
+  var lightColors = [0xff4d6d, 0xffb703, 0x06d6a0, 0x118ab2, 0x8338ec, 0xff006e];
+  var lights = [];
+  for (var i = 0; i < lightColors.length; i++) {
+    var pl = new THREE.PointLight(lightColors[i], 1.2, 22, 2);
+    scene.add(pl);
+    lights.push(pl);
+  }
+
+  var topY = 8;
+  ball.position.y = 7;
+  var t0 = performance.now();
+  var dur = 6000;
+  var fadeStart = 0.7;
+
+  function frame(now) {
+    var t = Math.min(1, (now - t0) / dur);
+    var drop = Math.min(1, t / 0.25);
+    var ease = 1 - Math.pow(1 - drop, 3);
+    ball.position.y = 7 - ease * 5.4; // 7 -> 1.6
+    ball.rotation.y += 0.035;
+    for (var i = 0; i < lights.length; i++) {
+      var a = now * 0.0016 + i * (Math.PI * 2 / lights.length);
+      lights[i].position.set(Math.cos(a) * 3.4, 1.6 + Math.sin(now * 0.001 + i) * 1.4, Math.sin(a) * 3.4);
+    }
+    var ballTopY = ball.position.y + ballR;
+    string.position.y = (topY + ballTopY) / 2;
+    string.scale.y = Math.max(0.01, topY - ballTopY);
+    if (t > fadeStart) {
+      overlay.style.opacity = 1 - (t - fadeStart) / (1 - fadeStart);
+    }
+    renderer.render(scene, camera);
+    if (t < 1) { requestAnimationFrame(frame); }
+    else { renderer.dispose(); overlay.remove(); }
+  }
+  requestAnimationFrame(frame);
+}
+
+function disco() {
+  var cols = 12, rows = 8;
+  var sqs = [];
+  for (var r = 0; r < rows; r++) {
+    for (var c = 0; c < cols; c++) {
+      var s = document.createElement('div');
+      s.className = 'dance-square';
+      s.style.left = (c * 100 / cols) + 'vw';
+      s.style.top = (r * 100 / rows) + 'vh';
+      s.style.width = (100 / cols) + 'vw';
+      s.style.height = (100 / rows) + 'vh';
+      s.style.animationDelay = ((r + c) * 0.09) + 's';
+      document.body.appendChild(s);
+      sqs.push(s);
+    }
+  }
+  if (typeof THREE !== 'undefined') { disco3D(); }
+  else {
+    var str = document.createElement('div');
+    str.className = 'disco-string';
+    document.body.appendChild(str);
+    var ball = document.createElement('div');
+    ball.className = 'disco-ball';
+    document.body.appendChild(ball);
+    setTimeout(function () { str.remove(); ball.remove(); }, 6000);
+  }
+  setTimeout(function () {
+    for (var i = 0; i < sqs.length; i++) sqs[i].style.opacity = '0';
+  }, 4300);
+  setTimeout(function () {
+    for (var i = 0; i < sqs.length; i++) sqs[i].remove();
+  }, 6000);
+}
+
+function makeWaveGeometry() {
+  var geo = new THREE.PlaneGeometry(16, 13, 60, 48);
+  var p = geo.attributes.position;
+  var colors = new Float32Array(p.count * 3);
+  var baseZ = new Float32Array(p.count);
+  var cFoam = new THREE.Color(0xffffff);
+  var cTop = new THREE.Color(0x9fdcff);
+  var cMid = new THREE.Color(0x38bdf8);
+  var cBot = new THREE.Color(0x0a3f9e);
+  for (var i = 0; i < p.count; i++) {
+    var x = p.getX(i);
+    var y0 = p.getY(i);
+    var v = (y0 + 6.5) / 13;
+    var y, z;
+    if (v < 0.62) {
+      var b = v / 0.62;
+      y = -6.5 + 9.5 * b;
+      z = 1.7 * b * b;
+    } else {
+      var u = (v - 0.62) / 0.38;
+      var ang = u * 2.6;
+      var R = 1.25;
+      y = 3.0 - R * Math.sin(ang);
+      z = 1.7 + R * (1 - Math.cos(ang));
+    }
+    z += 0.12 * Math.sin(x * 1.5);
+    p.setY(i, y);
+    p.setZ(i, z);
+    baseZ[i] = z;
+    var c;
+    if (v > 0.72) c = cFoam;
+    else if (v > 0.55) c = cTop.clone().lerp(cFoam, (v - 0.55) / 0.17);
+    else if (v > 0.35) c = cMid.clone().lerp(cTop, (v - 0.35) / 0.2);
+    else c = cBot.clone().lerp(cMid, v / 0.35);
+    colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  geo.userData.baseZ = baseZ;
+  geo.computeVertexNormals();
+  return geo;
+}
+
+function makeWaterTexture() {
+  var c = document.createElement('canvas');
+  c.width = 256; c.height = 256;
+  var ctx = c.getContext('2d');
+  var g = ctx.createLinearGradient(0, 0, 0, 256);
+  g.addColorStop(0, 'rgba(210,240,255,0.92)');
+  g.addColorStop(0.12, 'rgba(96,165,250,0.88)');
+  g.addColorStop(0.5, 'rgba(37,99,235,0.85)');
+  g.addColorStop(1, 'rgba(8,47,140,0.9)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 256, 256);
+  return new THREE.CanvasTexture(c);
+}
+
+function makeSeaTexture(type) {
+  var c = document.createElement('canvas');
+  c.width = 160; c.height = 160;
+  var ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, 160, 160);
+  if (type === 'fish') {
+    var col = ['#ff9f43','#ffb142','#4fd1c5','#f472b6','#818cf8'][Math.floor(Math.random() * 5)];
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.ellipse(80, 80, 46, 26, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(38, 80); ctx.lineTo(10, 56); ctx.lineTo(10, 104); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(100, 74, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#111111';
+    ctx.beginPath(); ctx.arc(102, 74, 3.4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    ctx.beginPath(); ctx.arc(80, 96, 16, 0, Math.PI * 2); ctx.fill();
+  } else if (type === 'turtle') {
+    ctx.fillStyle = '#2e8b57';
+    ctx.beginPath(); ctx.ellipse(80, 96, 42, 34, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#1f6b43'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.ellipse(80, 96, 28, 21, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#6cc070';
+    ctx.beginPath(); ctx.arc(126, 88, 14, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#111111'; ctx.beginPath(); ctx.arc(132, 86, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#2e8b57';
+    ctx.beginPath(); ctx.ellipse(52, 118, 18, 8, 0.35, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(108, 122, 18, 8, -0.35, 0, Math.PI * 2); ctx.fill();
+  } else if (type === 'jellyfish') {
+    ctx.fillStyle = 'rgba(198,130,255,0.85)';
+    ctx.beginPath(); ctx.arc(80, 60, 38, Math.PI, 0); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(198,130,255,0.7)'; ctx.lineWidth = 4;
+    for (var i = 0; i < 5; i++) {
+      var x = 52 + i * 14;
+      ctx.beginPath(); ctx.moveTo(x, 96);
+      ctx.quadraticCurveTo(x + Math.sin(i) * 10, 120, x + Math.sin(i * 2) * 12, 142);
+      ctx.stroke();
+    }
+  } else if (type === 'octopus') {
+    ctx.fillStyle = '#ff7bac';
+    ctx.beginPath(); ctx.arc(80, 56, 34, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(66, 48, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(94, 48, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#111111';
+    ctx.beginPath(); ctx.arc(66, 48, 3.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(94, 48, 3.2, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#ff7bac'; ctx.lineWidth = 5;
+    for (var j = 0; j < 6; j++) {
+      var x2 = 46 + j * 16;
+      ctx.beginPath(); ctx.moveTo(x2, 88);
+      ctx.quadraticCurveTo(x2 + Math.sin(j) * 10, 112, x2 + Math.sin(j * 2) * 12, 140);
+      ctx.stroke();
+    }
+  } else {
+    ctx.fillStyle = '#ef5a5a';
+    ctx.beginPath(); ctx.ellipse(80, 92, 34, 24, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(34, 70, 14, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(126, 70, 14, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(70, 84, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(90, 84, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#111111';
+    ctx.beginPath(); ctx.arc(70, 84, 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(90, 84, 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#ef5a5a'; ctx.lineWidth = 4;
+    for (var k = -2; k <= 2; k++) {
+      ctx.beginPath(); ctx.moveTo(80, 114); ctx.lineTo(80 + k * 16, 146); ctx.stroke();
+    }
+  }
+  return new THREE.CanvasTexture(c);
+}
+
+function buildCreature(type) {
+  var spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeSeaTexture(type), transparent: true }));
+  spr.userData = { type: type };
+  return spr;
+}
+
+function tsunami() {
+  var overlay = document.createElement('div');
+  overlay.className = 'meteor3d';
+  document.body.appendChild(overlay);
+  var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  overlay.appendChild(renderer.domElement);
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.z = 10;
+  scene.add(new THREE.AmbientLight(0xbfdbfe, 0.9));
+  var key = new THREE.DirectionalLight(0xffffff, 1.2);
+  key.position.set(-3, 5, 8);
+  scene.add(key);
+
+  var waveGroup = new THREE.Group();
+  var waveGeo = makeWaveGeometry();
+  var wave = new THREE.Mesh(waveGeo, new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, opacity: 0.9, roughness: 0.3, metalness: 0.25, side: THREE.DoubleSide }));
+  var waveBack = new THREE.Mesh(waveGeo, new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, opacity: 0.8, roughness: 0.4, metalness: 0.1, side: THREE.DoubleSide }));
+  waveBack.position.z = -2.4;
+  waveGroup.add(wave);
+  waveGroup.add(waveBack);
+  waveGroup.position.set(14, 0, 0);
+  waveGroup.rotation.y = -0.5;
+  waveGroup.rotation.x = -0.12;
+  scene.add(waveGroup);
+
+  var wGeo = new THREE.PlaneGeometry(40, 30, 72, 54);
+  var water = new THREE.Mesh(wGeo, new THREE.MeshStandardMaterial({ map: makeWaterTexture(), transparent: true, opacity: 0.6, roughness: 0.15, metalness: 0.05, side: THREE.DoubleSide }));
+  water.position.set(0, -18, 0.5);
+  scene.add(water);
+
+  var seaTypes = ['fish', 'turtle', 'jellyfish', 'octopus', 'crab', 'fish', 'fish', 'turtle'];
+  var fish = [];
+  for (var i = 0; i < 16; i++) {
+    var f = buildCreature(seaTypes[i % seaTypes.length]);
+    var sc = 0.8 + Math.random() * 0.9;
+    var side = (i % 2 === 0) ? -1 : 1;
+    var dir = -side;
+    f.position.set(side * 15, -4.5 + Math.random() * 5.5, 0.6 + Math.random() * 1.2);
+    f.scale.set(sc * dir, sc, 1);
+    f.userData = { dir: dir, speed: 0.05 + Math.random() * 0.05, phase: Math.random() * 6.28, sc: sc, spawnT: 2.6 + i * 0.08, side: side };
+    f.visible = false;
+    scene.add(f);
+    fish.push(f);
+  }
+
+  var t0 = performance.now();
+  function frame(now) {
+    var t = (now - t0) / 1000;
+    if (t < 2.4) {
+      waveGroup.position.x = 14 - (t / 2.4) * 28;
+      var wfade = t < 1.7 ? 1 : Math.max(0, 1 - (t - 1.7) / 0.7);
+      wave.material.opacity = 0.9 * wfade;
+      waveBack.material.opacity = 0.8 * wfade;
+    } else {
+      waveGroup.visible = false;
+    }
+    var wp2 = waveGeo.attributes.position;
+    var wBaseZ = waveGeo.userData.baseZ;
+    for (var v2 = 0; v2 < wp2.count; v2++) {
+      var wx = wp2.getX(v2), wy = wp2.getY(v2);
+      wp2.setZ(v2, wBaseZ[v2] + 0.5 * Math.sin(wx * 0.55 - t * 4.5 + wy * 0.18));
+    }
+    wp2.needsUpdate = true;
+    if (t >= 2.4 && t < 12.4) {
+      var k = Math.min(1, (t - 2.4) / 1.1);
+      water.position.y = -18 + k * 7.5;
+    } else if (t >= 12.4) {
+      var d = Math.min(1, (t - 12.4) / 1.8);
+      water.position.y = -10.5 - 7.5 * d;
+    }
+    var wp = wGeo.attributes.position;
+    for (var v = 0; v < wp.count; v++) {
+      var x = wp.getX(v), y = wp.getY(v);
+      wp.setZ(v, 0.35 * Math.sin(x * 0.7 + t * 1.8) * Math.cos(y * 0.8 + t * 1.4));
+    }
+    wp.needsUpdate = true;
+    for (var fi = 0; fi < fish.length; fi++) {
+      var f3 = fish[fi];
+      if (t < f3.userData.spawnT) { f3.visible = false; continue; }
+      if (t >= 11.8) {
+        var ex = f3.userData.side;
+        f3.position.x += ex * 0.18;
+        f3.position.y += Math.sin(t * 1.6 + f3.userData.phase) * 0.02;
+        f3.material.rotation = Math.sin(t * 3 + f3.userData.phase) * 0.22;
+        f3.scale.x = f3.userData.sc * ex;
+        if (Math.abs(f3.position.x) > 16) { f3.visible = false; continue; }
+        f3.visible = true;
+        continue;
+      }
+      f3.visible = true;
+      f3.position.x += f3.userData.dir * f3.userData.speed;
+      f3.position.y += Math.sin(t * 1.6 + f3.userData.phase) * 0.02;
+      f3.material.rotation = Math.sin(t * 3 + f3.userData.phase) * 0.22;
+      if (f3.position.x > 14) f3.userData.dir = -1;
+      if (f3.position.x < -14) f3.userData.dir = 1;
+      f3.scale.x = f3.userData.sc * f3.userData.dir;
+    }
+    renderer.render(scene, camera);
+    if (t < 14.6) { requestAnimationFrame(frame); }
+    else { renderer.dispose(); overlay.remove(); }
+  }
+  requestAnimationFrame(frame);
+}
+
+function makeWreck(x, y, scene, wrecks) {
+  var fire = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeGlowTexture(), color: 0xffaa44, blending: THREE.AdditiveBlending, transparent: true, opacity: 0.8, depthWrite: false }));
+  fire.position.set(x, y, -0.5);
+  fire.scale.set(2.2, 2.2, 1);
+  scene.add(fire);
+  var smoke = [];
+  for (var i = 0; i < 4; i++) {
+    var sm = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeGlowTexture(), color: 0x333333, transparent: true, opacity: 0.35, depthWrite: false }));
+    sm.position.set(x + (Math.random() - 0.5) * 1.5, y + Math.random() * 1.2, -0.4);
+    sm.scale.set(1 + Math.random(), 1 + Math.random(), 1);
+    scene.add(sm);
+    smoke.push(sm);
+  }
+  wrecks.push({ fire: fire, smoke: smoke, ph: Math.random() * 6.28 });
+}
+
+function buildAlien() {
+  var g = new THREE.Group();
+  var skin = new THREE.MeshStandardMaterial({ color: 0x7bd88f, roughness: 0.5, metalness: 0.1 });
+  var eyeMat = new THREE.MeshBasicMaterial({ color: 0x0b0b0b });
+  var head = new THREE.Mesh(new THREE.SphereGeometry(0.5, 24, 18), skin);
+  head.scale.set(1.1, 1.3, 1);
+  head.position.y = 0.75;
+  g.add(head);
+  for (var e = -1; e <= 1; e += 2) {
+    var eye = new THREE.Mesh(new THREE.SphereGeometry(0.13, 12, 10), eyeMat);
+    eye.scale.set(1, 1.6, 0.6);
+    eye.position.set(e * 0.2, 0.8, 0.42);
+    g.add(eye);
+  }
+  var body = new THREE.Mesh(new THREE.SphereGeometry(0.32, 18, 14), skin);
+  body.scale.set(0.9, 1.2, 0.8);
+  body.position.y = 0.0;
+  g.add(body);
+  for (var a = -1; a <= 1; a += 2) {
+    var arm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.8, 8), skin);
+    arm.position.set(a * 0.4, 0.05, 0);
+    g.add(arm);
+  }
+  for (var l = -1; l <= 1; l += 2) {
+    var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.6, 8), skin);
+    leg.position.set(l * 0.14, -0.5, 0);
+    g.add(leg);
+  }
+  return g;
+}
+
+function spawnAlien(x, y, scene, aliens) {
+  var al = buildAlien();
+  al.position.set(x, y, -0.4);
+  al.userData = { rise: 0, ph: Math.random() * 6.28 };
+  scene.add(al);
+  aliens.push(al);
+}
+
+function shipMetal(color) {
+  return new THREE.MeshStandardMaterial({ color: color, roughness: 0.28, metalness: 0.82 });
+}
+
+function buildUFO() {
+  var g = new THREE.Group();
+  var body = new THREE.Mesh(new THREE.SphereGeometry(0.85, 32, 20), shipMetal(0x9aa5b1));
+  body.scale.y = 0.32;
+  g.add(body);
+  var dome = new THREE.Mesh(new THREE.SphereGeometry(0.3, 18, 12, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x9be8ff, roughness: 0.05, metalness: 0.15, transparent: true, opacity: 0.75 }));
+  dome.position.y = 0.14;
+  g.add(dome);
+  var lights = [];
+  for (var i = 0; i < 8; i++) {
+    var a = (i / 8) * Math.PI * 2;
+    var lt = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), new THREE.MeshBasicMaterial({ color: i % 2 ? 0xff3355 : 0x37ffa8 }));
+    lt.position.set(Math.cos(a) * 0.82, -0.04, Math.sin(a) * 0.82);
+    g.add(lt);
+    lights.push(lt);
+  }
+  g.userData = { lights: lights };
+  return g;
+}
+
+function buildRocket() {
+  var g = new THREE.Group();
+  var shell = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.34, 1.5, 18), shipMetal(0xe7ecf3));
+  shell.rotation.z = Math.PI / 2;
+  g.add(shell);
+  var nose = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.6, 18), new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.35, metalness: 0.5 }));
+  nose.rotation.z = -Math.PI / 2;
+  nose.position.x = 1.0;
+  g.add(nose);
+  for (var i = 0; i < 3; i++) {
+    var a = (i / 3) * Math.PI * 2;
+    var fin = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.05, 0.42), new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.35, metalness: 0.5 }));
+    fin.position.set(-0.55, 0, 0);
+    fin.rotation.x = a;
+    g.add(fin);
+  }
+  var flame = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.9, 14), new THREE.MeshBasicMaterial({ color: 0xffa53a, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending }));
+  flame.rotation.z = Math.PI / 2;
+  flame.position.x = -1.1;
+  g.add(flame);
+  g.userData = { flame: flame };
+  return g;
+}
+
+function buildFighter() {
+  var g = new THREE.Group();
+  var hull = new THREE.Mesh(new THREE.ConeGeometry(0.3, 1.8, 16), shipMetal(0xb8c2cf));
+  hull.rotation.z = Math.PI / 2;
+  g.add(hull);
+  var wing = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.06, 1.5), new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.3, metalness: 0.55 }));
+  wing.position.set(-0.15, 0, 0);
+  g.add(wing);
+  var cockpit = new THREE.Mesh(new THREE.SphereGeometry(0.18, 14, 10), new THREE.MeshStandardMaterial({ color: 0x67e8f9, roughness: 0.05, metalness: 0.2, transparent: true, opacity: 0.85 }));
+  cockpit.position.set(0.45, 0.12, 0);
+  g.add(cockpit);
+  var glow = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending }));
+  glow.position.set(-0.95, 0, 0);
+  g.add(glow);
+  g.userData = { glow: glow };
+  return g;
+}
+
+function buildCow() {
+  var g = new THREE.Group();
+  var white = new THREE.MeshStandardMaterial({ color: 0xf7f5f0, roughness: 0.6 });
+  var black = new THREE.MeshStandardMaterial({ color: 0x262626, roughness: 0.6 });
+  var pink = new THREE.MeshStandardMaterial({ color: 0xe0a0b0, roughness: 0.6 });
+  var hornMat = new THREE.MeshStandardMaterial({ color: 0xd9c9a0, roughness: 0.5 });
+  var body = new THREE.Mesh(new THREE.SphereGeometry(0.65, 24, 18), white);
+  body.scale.set(1.4, 0.9, 0.95);
+  body.position.y = 0.7;
+  g.add(body);
+  var spotDefs = [[0.55, 0.9, 0.4], [0.0, 0.55, -0.45], [-0.6, 0.85, 0.3], [0.3, 0.8, -0.4], [-0.15, 1.0, 0.4]];
+  for (var s = 0; s < spotDefs.length; s++) {
+    var spot = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 10), black);
+    spot.scale.set(1.1, 0.5, 0.5);
+    spot.position.set(spotDefs[s][0], spotDefs[s][1], spotDefs[s][2]);
+    g.add(spot);
+  }
+  var head = new THREE.Mesh(new THREE.SphereGeometry(0.36, 20, 16), white);
+  head.position.set(0.95, 1.05, 0);
+  g.add(head);
+  var snout = new THREE.Mesh(new THREE.SphereGeometry(0.24, 14, 12), pink);
+  snout.position.set(1.22, 0.92, 0);
+  g.add(snout);
+  var nostril = new THREE.MeshBasicMaterial({ color: 0x1a1a1a });
+  for (var n = -1; n <= 1; n += 2) {
+    var no = new THREE.Mesh(new THREE.SphereGeometry(0.03, 6, 6), nostril);
+    no.position.set(1.4, 0.92, 0.08 * n);
+    g.add(no);
+  }
+  var eyeMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+  for (var e = -1; e <= 1; e += 2) {
+    var eye = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), eyeMat);
+    eye.position.set(1.05, 1.2, 0.2 * e);
+    g.add(eye);
+  }
+  for (var e2 = -1; e2 <= 1; e2 += 2) {
+    var ear = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 8), white);
+    ear.scale.set(1, 0.7, 0.4);
+    ear.position.set(0.82, 1.4, 0.28 * e2);
+    g.add(ear);
+  }
+  for (var h = -1; h <= 1; h += 2) {
+    var hr = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.22, 8), hornMat);
+    hr.position.set(0.78, 1.5, 0.18 * h);
+    g.add(hr);
+  }
+  var legPos = [[0.55, 0.32, 0.35], [0.55, 0.32, -0.35], [-0.55, 0.32, 0.35], [-0.55, 0.32, -0.35]];
+  for (var l = 0; l < 4; l++) {
+    var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.65, 8), white);
+    leg.position.set(legPos[l][0], legPos[l][1], legPos[l][2]);
+    g.add(leg);
+    var hoof = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.08, 8), black);
+    hoof.position.set(legPos[l][0], 0.0, legPos[l][2]);
+    g.add(hoof);
+  }
+  var tail = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5, 6), white);
+  tail.position.set(-0.9, 0.85, 0);
+  tail.rotation.z = 0.6;
+  g.add(tail);
+  var tuft = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 8), black);
+  tuft.position.set(-1.05, 0.62, 0);
+  g.add(tuft);
+  return g;
+}
+
+function spaceBattle() {
+  var overlay = document.createElement('div');
+  overlay.className = 'meteor3d';
+  document.body.appendChild(overlay);
+  var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  overlay.appendChild(renderer.domElement);
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.z = 10;
+  scene.add(new THREE.AmbientLight(0x334155, 1.2));
+  var key = new THREE.DirectionalLight(0xffffff, 1.3);
+  key.position.set(-4, 6, 8);
+  scene.add(key);
+  var pl1 = new THREE.PointLight(0x66ccff, 1.6, 20, 2);
+  pl1.position.set(-6, 4, 4);
+  scene.add(pl1);
+  var pl2 = new THREE.PointLight(0xff66aa, 1.4, 20, 2);
+  pl2.position.set(6, 5, 4);
+  scene.add(pl2);
+
+  var starGeo = new THREE.BufferGeometry();
+  var sp = new Float32Array(300 * 3);
+  for (var i = 0; i < 300; i++) { sp[i * 3] = (Math.random() - 0.5) * 44; sp[i * 3 + 1] = (Math.random() - 0.5) * 24; sp[i * 3 + 2] = -4 - Math.random() * 5; }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(sp, 3));
+  var stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.07, transparent: true, opacity: 0.8 }));
+  scene.add(stars);
+
+  var ufo = buildUFO();
+  ufo.scale.setScalar(3.2);
+  ufo.position.set(16, 2.4, 0);
+  scene.add(ufo);
+
+  var beam = new THREE.Mesh(
+    new THREE.ConeGeometry(3.4, 5.8, 48, 1, true),
+    new THREE.MeshBasicMaterial({ color: 0xe7ff3f, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, depthWrite: false })
+  );
+  scene.add(beam);
+  var beamLight = new THREE.PointLight(0xdfff3f, 0, 14, 2);
+  beamLight.position.set(0, -1, 2);
+  scene.add(beamLight);
+
+  var cows = [];
+  var cowXs = [-6, -3, 0, 3, 6];
+  for (var i = 0; i < cowXs.length; i++) {
+    var cow = buildCow();
+    cow.position.set(cowXs[i], -3.5, -0.3);
+    cow.scale.setScalar(0.65 + Math.random() * 0.25);
+    cow.userData = { baseX: cowXs[i], dir: (cowXs[i] < 0 ? -1 : 1) };
+    scene.add(cow);
+    cows.push(cow);
+  }
+  var victim = cows[2];
+
+  var t0 = performance.now();
+  function frame(now) {
+    var t = (now - t0) / 1000;
+    if (t < 1.8) {
+      var k = Math.min(1, t / 1.8);
+      var ease = 1 - Math.pow(1 - k, 3);
+      ufo.position.x = 16 - ease * 16;
+      ufo.position.y = 2.4 + Math.sin(t * 2.2) * 0.1;
+    } else if (t < 5.4) {
+      ufo.position.x = 0;
+      ufo.position.y = 2.4 + Math.sin(t * 2.2) * 0.1;
+    } else {
+      var k2 = Math.min(1, (t - 5.4) / 1.4);
+      ufo.position.x = -k2 * k2 * 16;
+      ufo.position.y = 2.4 - k2 * 3;
+    }
+    ufo.rotation.y += 0.006;
+
+    var bop = 0;
+    if (t >= 2.0 && t < 2.5) bop = (t - 2.0) / 0.5;
+    else if (t >= 2.5 && t < 5.0) bop = 1;
+    else if (t >= 5.0 && t < 5.4) bop = 1 - (t - 5.0) / 0.4;
+    beam.material.opacity = 0.55 * bop;
+    beam.position.set(ufo.position.x, ufo.position.y - 3.1, 0);
+    beamLight.intensity = 3 * bop;
+    beamLight.position.set(ufo.position.x, ufo.position.y - 2.5, 2);
+
+    if (t >= 2.5 && t < 5.0) {
+      var k3 = (t - 2.5) / 2.5;
+      victim.position.y = -3.5 + k3 * 5.4;
+      victim.position.x = Math.sin(t * 9) * 0.15;
+      victim.rotation.z = k3 * 2.5;
+      victim.scale.setScalar(0.8 * (1 - k3 * 0.65));
+    } else if (t >= 5.0) {
+      victim.visible = false;
+    }
+    if (t >= 5.0) {
+      for (var ci = 0; ci < cows.length; ci++) {
+        var cw = cows[ci];
+        if (cw === victim) continue;
+        if (Math.abs(cw.position.x) < 17) {
+          cw.position.x += cw.userData.dir * (0.09 + Math.random() * 0.06);
+          cw.rotation.z = Math.sin(t * 18 + cw.userData.baseX) * 0.18;
+          cw.position.y = -3.5 + Math.abs(Math.sin(t * 13 + cw.userData.baseX)) * 0.05;
+        } else {
+          cw.visible = false;
+        }
+      }
+    }
+
+    stars.position.x -= 0.004;
+    if (stars.position.x < -22) stars.position.x = 0;
+    renderer.render(scene, camera);
+    if (t < 7.4) { requestAnimationFrame(frame); }
+    else { renderer.dispose(); overlay.remove(); }
+  }
+  requestAnimationFrame(frame);
+}
+
+function buildPenguin() {
+  var g = new THREE.Group();
+  var black = new THREE.MeshStandardMaterial({ color: 0x1a1a24, roughness: 0.6 });
+  var white = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.5 });
+  var orange = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.4 });
+  var body = new THREE.Mesh(new THREE.SphereGeometry(0.55, 24, 18), black);
+  body.scale.set(1, 1.15, 0.95);
+  g.add(body);
+  var belly = new THREE.Mesh(new THREE.SphereGeometry(0.42, 20, 16), white);
+  belly.scale.set(0.9, 1.05, 0.7);
+  belly.position.set(-0.02, -0.08, 0.32);
+  g.add(belly);
+  var head = new THREE.Mesh(new THREE.SphereGeometry(0.34, 20, 16), black);
+  head.position.set(0, 0.82, 0);
+  g.add(head);
+  for (var e = -1; e <= 1; e += 2) {
+    var eye = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    eye.position.set(-0.22, 0.86, 0.3 * e);
+    g.add(eye);
+  }
+  var beak = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.3, 10), orange);
+  beak.rotation.z = -Math.PI / 2;
+  beak.position.set(-0.32, 0.78, 0);
+  g.add(beak);
+  for (var f = -1; f <= 1; f += 2) {
+    var foot = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), orange);
+    foot.scale.set(1.3, 0.45, 1.1);
+    foot.position.set(f * 0.16, -0.6, 0.1);
+    g.add(foot);
+  }
+  for (var s = -1; s <= 1; s += 2) {
+    var flip = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), black);
+    flip.scale.set(0.4, 1.5, 0.5);
+    flip.position.set(s * 0.5, 0.05, 0.05);
+    g.add(flip);
+  }
+  return g;
+}
+
+function penguins() {
+  var overlay = document.createElement('div');
+  overlay.className = 'meteor3d';
+  document.body.appendChild(overlay);
+  var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  overlay.appendChild(renderer.domElement);
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.z = 10;
+  scene.add(new THREE.AmbientLight(0xdfe8f5, 1.1));
+  var key = new THREE.DirectionalLight(0xffffff, 1.2);
+  key.position.set(-3, 6, 8);
+  scene.add(key);
+
+  var penguinsList = [];
+  for (var i = 0; i < 12; i++) {
+    var p = buildPenguin();
+    var z = -3 + Math.random() * 4.5;
+    var s = 0.5 + (z + 3) / 4.5 * 0.5;
+    p.position.set(13 + Math.random() * 30, -4 + Math.random() * 0.9, z);
+    p.scale.setScalar(s);
+    p.userData = { speed: 0.04 + Math.random() * 0.1 + (z + 3) / 4.5 * 0.03, phase: Math.random() * 6.28, z: z };
+    scene.add(p);
+    penguinsList.push(p);
+  }
+
+  var t0 = performance.now();
+  function frame(now) {
+    var t = (now - t0) / 1000;
+    for (var i = penguinsList.length - 1; i >= 0; i--) {
+      var p = penguinsList[i];
+      p.position.x -= p.userData.speed;
+      p.rotation.z = Math.sin(t * 6 + p.userData.phase) * 0.22;
+      p.rotation.y = Math.sin(t * 6 + p.userData.phase) * 0.18;
+      if (p.position.x < -17) { scene.remove(p); penguinsList.splice(i, 1); }
+    }
+    renderer.render(scene, camera);
+    if (penguinsList.length > 0 && t < 15) { requestAnimationFrame(frame); }
+    else { renderer.dispose(); overlay.remove(); }
+  }
+  requestAnimationFrame(frame);
+}
+
+function everything() {
+  strikeMeteor();
+  nuke();
+  tsunami();
+  spaceBattle();
+  penguins();
+  disco();
+}
+
+fetch('/api/settings').then(function (r) { return r.json(); }).then(function (s) { cooldownOn = !!s.cooldown; refreshAdminUI(); }).catch(function () {});
+refreshAdminUI();
+
+var lastBroadcastId = null;
+var broadcastTimer = null;
+function updateBroadcastBanner(b) {
+  var banner = document.getElementById('broadcast-banner');
+  if (b && b.message) {
+    banner.textContent = b.message;
+    banner.classList.remove('hidden');
+    banner.classList.add('fade');
+    void banner.offsetWidth;
+    banner.classList.remove('fade');
+    clearTimeout(broadcastTimer);
+    broadcastTimer = setTimeout(function () {
+      banner.style.transition = 'opacity .4s ease';
+      banner.classList.add('fade');
+      setTimeout(function () { banner.classList.add('hidden'); }, 400);
+    }, 2500);
+  } else {
+    banner.textContent = '';
+    banner.classList.add('hidden');
+  }
+}
+function pollBroadcast() {
+  fetch('/api/broadcast')
+    .then(function (r) { return r.json(); })
+    .then(function (b) {
+      if (!b || b.id === lastBroadcastId) return;
+      lastBroadcastId = b.id;
+      updateBroadcastBanner(b);
+    })
+    .catch(function () {});
+}
+function sendBroadcast() {
+  var input = document.getElementById('broadcast-input');
+  var message = input.value.trim();
+  if (!message) return;
+  fetch('/api/broadcast', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Pass': adminPass || '' },
+    body: JSON.stringify({ message: message })
+  }).then(function (r) { return r.json(); }).then(function (b) {
+    input.value = '';
+    if (b && b.id) { lastBroadcastId = b.id; updateBroadcastBanner(b); }
+  }).catch(function () {});
+}
+document.getElementById('broadcast-send').addEventListener('click', sendBroadcast);
+document.getElementById('broadcast-input').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') sendBroadcast();
+});
+pollBroadcast();
+setInterval(pollBroadcast, 2000);
+
+loadItems();
+
+var savedName = localStorage.getItem('lf-name');
+if (savedName) {
+  document.getElementById('name').value = savedName;
+}
+
+(function () {
+  var fab = document.getElementById('chat-fab');
+  var panel = document.getElementById('chat-panel');
+  var body = document.getElementById('chat-body');
+  var input = document.getElementById('chat-input');
+  var send = document.getElementById('chat-send');
+  var greeted = false;
+
+  function addMsg(text, who) {
+    var el = document.createElement('div');
+    el.className = 'chat-msg ' + who;
+    el.textContent = text;
+    body.appendChild(el);
+    body.scrollTop = body.scrollHeight;
+  }
+  function openPanel() {
+    panel.classList.toggle('hidden');
+    if (!panel.classList.contains('hidden') && !greeted) {
+      greeted = true;
+      addMsg("Hi! I can answer questions about this Lost & Found board. Try asking how to report a lost item or search for something.", 'bot');
+    }
+  }
+  function sendMsg() {
+    var msg = input.value.trim();
+    if (!msg) return;
+    addMsg(msg, 'user');
+    input.value = '';
+    fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      addMsg(d.reply || 'Sorry, I had trouble with that.', 'bot');
+    }).catch(function () {
+      addMsg('Sorry, I could not reach the server.', 'bot');
+    });
+  }
+  fab.addEventListener('click', openPanel);
+  send.addEventListener('click', sendMsg);
+  input.addEventListener('keydown', function (e) { if (e.key === 'Enter') sendMsg(); });
+})();
+
+</script>
+</body>
+</html>
