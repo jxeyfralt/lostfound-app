@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const { DatabaseSync } = require('node:sqlite');
 
 const PORT = process.env.PORT || 3000;
-const ADMIN_PASS = process.env.ADMIN_PASS || 'Purpleb00ger78';
+const ADMIN_PASS = process.env.ADMIN_PASS || 'purplebooger';
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'lostfound.db');
 
 // Legacy flat files (used only for one-time import on first run)

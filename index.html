@@ -373,6 +373,7 @@
         <button id="effects-toggle" class="theme-toggle" title="Toggle admin effects">&#10024;</button>
         <button id="admin-btn" class="admin-btn" title="Admin">&#128274;</button>
         <button id="dashboard-btn" class="nav-text-btn hidden">&#128202; Dashboard</button>
+        <button id="catalog-btn" class="nav-text-btn hidden">&#128230; Catalog</button>
         <button id="abuse-btn" class="nav-text-btn hidden">&#9732;&#65039; Admin Abuse</button>
       </div>
     </div>
@@ -410,18 +411,24 @@
           <button id="archive-toggle" class="archive-toggle hidden">&#128194; View archived activity</button>
           <ul id="archive-feed" class="activity-feed archive-feed hidden"></ul>
         </div>
-        <div class="activity-card">
-          <h3>Catalog</h3>
-          <div class="catalog-add-form">
-            <input id="catalog-add-name" type="text" placeholder="Found item name (e.g. Blue jacket)" autocomplete="off">
-            <label class="upload-btn" for="catalog-add-photo">&#128247; Photo</label>
-            <input id="catalog-add-photo" type="file" accept="image/*" class="hidden">
-            <span id="catalog-add-preview" class="reply-img-preview hidden"></span>
-            <button id="catalog-add-btn" class="btn-primary">+ Add to catalog</button>
-          </div>
-          <h3>All items</h3>
-          <ul id="catalog-list" class="catalog-list"><li class="empty">No items yet.</li></ul>
+      </div>
+    </div>
+
+    <div id="catalog-modal" class="dashboard-modal hidden">
+      <div class="dashboard-inner">
+        <div class="dashboard-head">
+          <h2>Catalog</h2>
+          <button id="catalog-close" class="dashboard-close" title="Close">&#10005;</button>
         </div>
+        <div class="catalog-add-form">
+          <input id="catalog-add-name" type="text" placeholder="Found item name (e.g. Blue jacket)" autocomplete="off">
+          <label class="upload-btn" for="catalog-add-photo">&#128247; Photo</label>
+          <input id="catalog-add-photo" type="file" accept="image/*" class="hidden">
+          <span id="catalog-add-preview" class="reply-img-preview hidden"></span>
+          <button id="catalog-add-btn" class="btn-primary">+ Add to catalog</button>
+        </div>
+        <h3>All items</h3>
+        <ul id="catalog-list" class="catalog-list"><li class="empty">No items yet.</li></ul>
       </div>
     </div>
 
@@ -758,7 +765,7 @@ function renderMatches() {
 function loadItems() {
   fetch('/api/items')
     .then(function (r) { return r.json(); })
-    .then(function (data) { items = data || []; render(); renderMatches(); })
+    .then(function (data) { items = data || []; render(); renderMatches(); updateStats(); loadCatalog(); })
     .catch(function () { document.getElementById('lost-list').innerHTML = '<li class="empty">Could not load. Is the server running?</li>'; });
 }
 
@@ -1007,10 +1014,14 @@ function refreshAdminUI() {
   cb.textContent = cooldownOn ? 'Cooldown: ON' : 'Cooldown: OFF';
   cb.classList.toggle('active', cooldownOn);
   document.getElementById('dashboard-btn').classList.toggle('hidden', !isAdmin());
+  document.getElementById('catalog-btn').classList.toggle('hidden', !isAdmin());
   document.getElementById('abuse-btn').classList.toggle('hidden', !isAdmin());
   document.getElementById('activity-clear-btn').classList.toggle('hidden', !isAdmin());
   document.getElementById('archive-toggle').classList.toggle('hidden', !isAdmin());
-  if (!isAdmin()) document.getElementById('admin-dashboard').classList.add('hidden');
+  if (!isAdmin()) {
+    document.getElementById('admin-dashboard').classList.add('hidden');
+    document.getElementById('catalog-modal').classList.add('hidden');
+  }
 }
 
 function animateCount(el, target) {
@@ -1160,6 +1171,7 @@ document.getElementById('cooldown-btn').addEventListener('click', function () {
 });
 
 document.getElementById('dashboard-btn').addEventListener('click', function () {
+  document.getElementById('catalog-modal').classList.add('hidden');
   document.getElementById('admin-dashboard').classList.remove('hidden');
   refreshDashboard();
 });
@@ -1168,6 +1180,18 @@ document.getElementById('dashboard-close').addEventListener('click', function ()
 });
 document.getElementById('admin-dashboard').addEventListener('click', function (e) {
   if (e.target === this) document.getElementById('admin-dashboard').classList.add('hidden');
+});
+
+document.getElementById('catalog-btn').addEventListener('click', function () {
+  document.getElementById('admin-dashboard').classList.add('hidden');
+  document.getElementById('catalog-modal').classList.remove('hidden');
+  loadCatalog();
+});
+document.getElementById('catalog-close').addEventListener('click', function () {
+  document.getElementById('catalog-modal').classList.add('hidden');
+});
+document.getElementById('catalog-modal').addEventListener('click', function (e) {
+  if (e.target === this) document.getElementById('catalog-modal').classList.add('hidden');
 });
 
 document.getElementById('abuse-btn').addEventListener('click', function () {
