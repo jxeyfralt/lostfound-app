@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Lost &amp; Found</title>
 <style>
   :root {
@@ -70,6 +73,7 @@
   .nav-right { display: flex; align-items: center; gap: 18px; }
   .theme-toggle { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); width: 38px; height: 38px; border-radius: 10px; font-size: 1.05rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color .15s; }
   .theme-toggle:hover { border-color: var(--primary); }
+  .theme-toggle.effects-off { opacity: .4; }
   .admin-btn { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); width: 38px; height: 38px; border-radius: 10px; font-size: 1.05rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color .15s; }
   .admin-btn:hover { border-color: var(--primary); }
   .admin-btn.active { border-color: var(--green); color: var(--green); }
@@ -201,6 +205,13 @@
   .activity-dot.delete { background: #ef4444; }
   .activity-text { flex: 1; min-width: 0; word-wrap: break-word; }
   .activity-time { font-size: .74rem; color: var(--muted); flex-shrink: 0; }
+  .activity-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+  .activity-head h3 { margin-bottom: 0; }
+  .activity-clear-btn { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 5px 11px; font-size: .76rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .activity-clear-btn:hover { border-color: #b91c1c; color: #b91c1c; }
+  .archive-toggle { width: 100%; margin-top: 10px; background: var(--input-bg); border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 7px 12px; font-size: .8rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .archive-toggle:hover { color: var(--text); border-color: var(--primary); }
+  .archive-feed { margin-top: 6px; }
   @keyframes dash-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
   .meteor { position: fixed; top: 50vh; left: 50vw; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #fde047 30%, #f97316 70%, rgba(249,115,22,0) 100%); box-shadow: 0 0 45px 22px rgba(251,146,60,.7); z-index: 5000; pointer-events: none; animation: meteor-fall 1s ease-in forwards; }
   @keyframes meteor-fall { 0% { transform: translate(-45vw, -80vh) scale(.6); opacity: 0; } 8% { opacity: 1; } 100% { transform: translate(0, 0) scale(1.6); opacity: 1; } }
@@ -301,6 +312,7 @@
   .broadcast-send:hover { background: var(--primary-600); }
   .chat-fab { position: fixed; right: 22px; bottom: 22px; z-index: 9500; width: 56px; height: 56px; border-radius: 50%; border: none; background: var(--primary); color: var(--on-primary); font-size: 1.6rem; cursor: pointer; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; transition: transform .15s; }
   .chat-fab:hover { transform: scale(1.06); }
+  .chat-badge { position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: #ef4444; color: #fff; font-size: .72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-sizing: border-box; box-shadow: var(--shadow-sm); }
   .chat-panel { position: fixed; right: 22px; bottom: 90px; z-index: 9500; width: min(360px, calc(100vw - 32px)); height: 480px; max-height: calc(100vh - 120px); background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; }
   .chat-panel.hidden { display: none; }
   .chat-head { padding: 14px 16px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: .95rem; display: flex; align-items: center; gap: 8px; color: var(--text); }
@@ -312,11 +324,41 @@
   .chat-input-row input { flex: 1; padding: 10px 13px; border: 1px solid var(--border); border-radius: 999px; background: var(--input-bg); color: var(--text); font-size: .92rem; font-family: inherit; }
   .chat-input-row input:focus { outline: none; border-color: var(--primary); }
   .chat-send { background: var(--primary); color: var(--on-primary); border: none; border-radius: 999px; padding: 0 18px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .gallery { position: relative; }
+  .gallery .photo-card-img { display: block; }
+  .gallery-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.5); color: #fff; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: .8rem; line-height: 1; display: flex; align-items: center; justify-content: center; opacity: .8; z-index: 2; }
+  .gallery-arrow:hover { opacity: 1; }
+  .gallery-prev { left: 6px; }
+  .gallery-next { right: 6px; }
+  .gallery-dots { position: absolute; bottom: 6px; left: 0; right: 0; display: flex; gap: 5px; justify-content: center; z-index: 2; }
+  .gallery-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.5); cursor: pointer; }
+  .gallery-dot.active { background: #fff; }
+  .no-img { aspect-ratio: 4/3; background: var(--input-bg); }
+  .catalog-admin { display: flex; gap: 6px; margin-top: 8px; }
+  .catalog-admin-btn { flex: 1; background: var(--input-bg); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 6px 8px; font-size: .72rem; font-weight: 600; cursor: pointer; font-family: inherit; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+  .catalog-admin-btn:hover { border-color: var(--primary); }
+  .catalog-admin-btn.danger:hover { border-color: #b91c1c; color: #b91c1c; }
+  .catalog-add-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+  .catalog-add-form input[type=text] { flex: 1; min-width: 140px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 9px; background: var(--input-bg); color: var(--text); font-family: inherit; font-size: .9rem; }
+  .catalog-list { list-style: none; display: flex; flex-direction: column; gap: 8px; max-height: 420px; overflow-y: auto; }
+  .catalog-item { display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid var(--border); border-radius: 10px; }
+  .catalog-item.hidden-item { opacity: .55; }
+  .catalog-item-img { width: 46px; height: 46px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--input-bg); }
+  .catalog-item-body { flex: 1; min-width: 0; }
+  .catalog-item-name { font-size: .85rem; font-weight: 600; word-break: break-word; }
+  .catalog-type { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 6px; border-radius: 999px; margin-left: 6px; vertical-align: middle; }
+  .catalog-type.found { background: var(--badge-green-bg); color: var(--badge-green-text); }
+  .catalog-type.lost { background: var(--badge-red-bg); color: var(--badge-red-text); }
+  .catalog-item-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .catalog-btn { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 5px 10px; font-size: .72rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .catalog-btn:hover { border-color: var(--primary); }
+  .catalog-btn.danger:hover { border-color: #b91c1c; color: #b91c1c; }
+  .catalog-btn.restore { color: var(--green); }
 </style>
 <script>
   try { if (localStorage.getItem('lf-theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="/three.min.js"></script>
 </head>
 <body>
   <nav class="nav">
@@ -328,6 +370,7 @@
           <a href="#report">Report lost</a>
         </div>
         <button id="theme-toggle" class="theme-toggle" title="Toggle dark mode">&#127769;</button>
+        <button id="effects-toggle" class="theme-toggle" title="Toggle admin effects">&#10024;</button>
         <button id="admin-btn" class="admin-btn" title="Admin">&#128274;</button>
         <button id="dashboard-btn" class="nav-text-btn hidden">&#128202; Dashboard</button>
         <button id="abuse-btn" class="nav-text-btn hidden">&#9732;&#65039; Admin Abuse</button>
@@ -359,8 +402,25 @@
           <div class="stat-card"><div class="stat-num" id="stat-replies">0</div><div class="stat-label">Replies</div></div>
         </div>
         <div class="activity-card">
-          <h3>Recent activity</h3>
+          <div class="activity-head">
+            <h3>Recent activity</h3>
+            <button id="activity-clear-btn" class="activity-clear-btn hidden" title="Clear the activity log">Clear</button>
+          </div>
           <ul id="activity-feed" class="activity-feed"><li class="empty">No activity yet.</li></ul>
+          <button id="archive-toggle" class="archive-toggle hidden">&#128194; View archived activity</button>
+          <ul id="archive-feed" class="activity-feed archive-feed hidden"></ul>
+        </div>
+        <div class="activity-card">
+          <h3>Catalog</h3>
+          <div class="catalog-add-form">
+            <input id="catalog-add-name" type="text" placeholder="Found item name (e.g. Blue jacket)" autocomplete="off">
+            <label class="upload-btn" for="catalog-add-photo">&#128247; Photo</label>
+            <input id="catalog-add-photo" type="file" accept="image/*" class="hidden">
+            <span id="catalog-add-preview" class="reply-img-preview hidden"></span>
+            <button id="catalog-add-btn" class="btn-primary">+ Add to catalog</button>
+          </div>
+          <h3>All items</h3>
+          <ul id="catalog-list" class="catalog-list"><li class="empty">No items yet.</li></ul>
         </div>
       </div>
     </div>
@@ -377,7 +437,7 @@
       </section>
       <aside class="card" id="report">
         <h2>Report a lost item</h2>
-        <form id="form">
+        <form id="form" autocomplete="off">
           <div class="field">
             <label for="name">Your name</label>
             <input id="name" type="text" placeholder="e.g. Joey C" autocomplete="off">
@@ -442,7 +502,7 @@
 
   <div id="broadcast-banner" class="broadcast-banner hidden"></div>
 
-  <button id="chat-fab" class="chat-fab" title="Chat">&#128172;</button>
+  <button id="chat-fab" class="chat-fab" title="Chat">&#128172;<span id="chat-badge" class="chat-badge hidden">0</span></button>
   <div id="chat-panel" class="chat-panel hidden">
     <div class="chat-head">&#129302; Lost &amp; Found helper</div>
     <div class="chat-body" id="chat-body"></div>
@@ -614,7 +674,7 @@ function lostCard(it) {
         repliesHtml +
         '<button class="btn-reply" data-id="' + it.id + '">&#128172; Reply</button>' +
         '<div class="reply-form hidden">' +
-          '<input class="reply-name" type="text" placeholder="Your name" value="' + escapeHtml(savedName) + '">' +
+          '<input class="reply-name" type="text" placeholder="Your name" autocomplete="off" value="' + escapeHtml(savedName) + '">' +
           '<textarea class="reply-msg-input" placeholder="I found it, or any info&hellip;"></textarea>' +
           '<div class="reply-form-row">' +
             '<label class="upload-btn" for="reply-image-' + it.id + '">&#128247; Upload image</label>' +
@@ -636,13 +696,33 @@ function render() {
   } else {
     lostList.innerHTML = lost.map(lostCard).join('');
   }
+  disableAutofill();
 }
 
+function galleryImages(it) {
+  return (it.images && it.images.length) ? it.images : (it.image ? [it.image] : []);
+}
 function matchCard(it) {
   var claimed = it.found;
+  var imgs = galleryImages(it);
+  var galleryHtml;
+  if (imgs.length === 0) {
+    galleryHtml = '<div class="photo-card-img no-img"></div>';
+  } else {
+    var arrows = imgs.length > 1
+      ? '<button class="gallery-arrow gallery-prev" data-id="' + it.id + '" title="Previous">&#10094;</button>' +
+        '<button class="gallery-arrow gallery-next" data-id="' + it.id + '" title="Next">&#10095;</button>'
+      : '';
+    var dots = imgs.length > 1
+      ? '<div class="gallery-dots">' + imgs.map(function (_, i) { return '<span class="gallery-dot' + (i === 0 ? ' active' : '') + '" data-id="' + it.id + '" data-idx="' + i + '"></span>'; }).join('') + '</div>'
+      : '';
+    galleryHtml = '<div class="gallery" data-id="' + it.id + '" data-idx="0">' +
+      '<img class="photo-card-img" src="' + imgs[0] + '" alt="' + escapeHtml(it.item) + '">' +
+      arrows + dots + '</div>';
+  }
   return (
     '<div class="photo-card' + (claimed ? ' claimed' : '') + '">' +
-      '<img class="photo-card-img" src="' + it.image + '" alt="' + escapeHtml(it.item) + '">' +
+      galleryHtml +
       '<div class="photo-card-body">' +
         '<div class="photo-card-title">' + escapeHtml(it.item) + (claimed ? ' <span class="badge-claimed">claimed</span>' : '') + '</div>' +
         (it.color ? '<div class="photo-card-color"><span class="color-dot" style="background:' + (COLOR_HEX[it.color] || '#ccc') + '"></span>' + it.color + '</div>' : '') +
@@ -678,7 +758,7 @@ function renderMatches() {
 function loadItems() {
   fetch('/api/items')
     .then(function (r) { return r.json(); })
-    .then(function (data) { items = data || []; render(); })
+    .then(function (data) { items = data || []; render(); renderMatches(); })
     .catch(function () { document.getElementById('lost-list').innerHTML = '<li class="empty">Could not load. Is the server running?</li>'; });
 }
 
@@ -744,12 +824,12 @@ function deleteItem(id) {
     });
 }
 
-function downscaleImage(file, cb) {
+function downscaleImage(file, cb, maxW) {
   var reader = new FileReader();
   reader.onload = function () {
     var img = new Image();
     img.onload = function () {
-      var max = 800;
+      var max = maxW || 800;
       var scale = Math.min(1, max / Math.max(img.width, img.height));
       var cw = Math.max(1, Math.round(img.width * scale));
       var ch = Math.max(1, Math.round(img.height * scale));
@@ -844,6 +924,12 @@ document.getElementById('lost-list').addEventListener('change', function (e) {
   }
 });
 document.getElementById('matches').addEventListener('click', function (e) {
+  var prev = e.target.closest('.gallery-prev');
+  if (prev) { galleryGo(prev.getAttribute('data-id'), -1); return; }
+  var next = e.target.closest('.gallery-next');
+  if (next) { galleryGo(next.getAttribute('data-id'), 1); return; }
+  var dot = e.target.closest('.gallery-dot');
+  if (dot) { gallerySet(dot.getAttribute('data-id'), parseInt(dot.getAttribute('data-idx'), 10)); return; }
   var img = e.target.closest('.photo-card-img');
   if (img) { openLightbox(img.getAttribute('src')); return; }
   var btn = e.target.closest('.btn-mine');
@@ -908,7 +994,7 @@ document.getElementById('theme-toggle').addEventListener('click', function () {
 });
 applyTheme();
 
-var adminPass = localStorage.getItem('lf-admin') || null;
+var adminPass = sessionStorage.getItem('lf-admin') || null;
 var cooldownOn = false;
 function isAdmin() { return !!adminPass; }
 function ownsItem(id) { return localStorage.getItem('lf-author-' + id) !== null; }
@@ -922,6 +1008,8 @@ function refreshAdminUI() {
   cb.classList.toggle('active', cooldownOn);
   document.getElementById('dashboard-btn').classList.toggle('hidden', !isAdmin());
   document.getElementById('abuse-btn').classList.toggle('hidden', !isAdmin());
+  document.getElementById('activity-clear-btn').classList.toggle('hidden', !isAdmin());
+  document.getElementById('archive-toggle').classList.toggle('hidden', !isAdmin());
   if (!isAdmin()) document.getElementById('admin-dashboard').classList.add('hidden');
 }
 
@@ -952,6 +1040,10 @@ function updateStats() {
   animateCount(document.getElementById('stat-replies'), replies);
 }
 
+function activityItemHtml(a) {
+  var dot = (a.type === 'claim') ? 'claim' : ((a.type === 'delete') ? 'delete' : ((a.type === 'reply') ? 'reply' : 'post'));
+  return '<li class="activity-item"><span class="activity-dot ' + dot + '"></span><span class="activity-text">' + escapeHtml(a.text) + '</span><span class="activity-time">' + timeAgo(a.time) + '</span></li>';
+}
 function loadActivity() {
   fetch('/api/activity')
     .then(function (r) { return r.json(); })
@@ -961,18 +1053,57 @@ function loadActivity() {
         feed.innerHTML = '<li class="empty">No activity yet.</li>';
         return;
       }
-      feed.innerHTML = acts.map(function (a) {
-        var dot = (a.type === 'claim') ? 'claim' : ((a.type === 'delete') ? 'delete' : ((a.type === 'reply') ? 'reply' : 'post'));
-        return '<li class="activity-item"><span class="activity-dot ' + dot + '"></span><span class="activity-text">' + escapeHtml(a.text) + '</span><span class="activity-time">' + timeAgo(a.time) + '</span></li>';
-      }).join('');
+      feed.innerHTML = acts.map(activityItemHtml).join('');
     })
     .catch(function () {});
 }
+function loadArchive() {
+  fetch('/api/activity/archive', { headers: { 'X-Admin-Pass': adminPass || '' } })
+    .then(function (r) { return r.json(); })
+    .then(function (acts) {
+      var feed = document.getElementById('archive-feed');
+      if (!acts || !acts.length) {
+        feed.innerHTML = '<li class="empty">Nothing archived yet.</li>';
+        return;
+      }
+      feed.innerHTML = acts.map(activityItemHtml).join('');
+    })
+    .catch(function () {});
+}
+function clearActivity() {
+  if (!confirm('Clear the activity log? Entries will be moved to the archive.')) return;
+  fetch('/api/activity/clear', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Pass': adminPass || '' }
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (res && res.ok) {
+      showToast('Activity cleared (' + res.cleared + ' entries archived).');
+      loadActivity();
+    } else {
+      showToast('Could not clear activity.');
+    }
+  }).catch(function () { showToast('Could not clear activity.'); });
+}
+document.getElementById('activity-clear-btn').addEventListener('click', clearActivity);
+document.getElementById('archive-toggle').addEventListener('click', function () {
+  var feed = document.getElementById('archive-feed');
+  var btn = document.getElementById('archive-toggle');
+  var showing = !feed.classList.contains('hidden');
+  if (showing) {
+    feed.classList.add('hidden');
+    btn.innerHTML = '&#128194; View archived activity';
+  } else {
+    feed.classList.remove('hidden');
+    btn.innerHTML = '&#128194; Hide archived activity';
+    loadArchive();
+  }
+});
 
 function refreshDashboard() {
   if (!isAdmin()) return;
   updateStats();
   loadActivity();
+  loadCatalog();
 }
 function openAdminModal() {
   document.getElementById('admin-pass-input').value = '';
@@ -986,7 +1117,7 @@ function closeAdminModal() {
 document.getElementById('admin-btn').addEventListener('click', function () {
   if (isAdmin()) {
     adminPass = null;
-    localStorage.removeItem('lf-admin');
+    sessionStorage.removeItem('lf-admin');
     refreshAdminUI();
     render(); renderMatches();
   } else {
@@ -1004,7 +1135,7 @@ document.getElementById('admin-unlock').addEventListener('click', function () {
   }).then(function (r) {
     if (r.status === 200) {
       adminPass = pass;
-      localStorage.setItem('lf-admin', pass);
+      sessionStorage.setItem('lf-admin', pass);
       closeAdminModal();
       refreshAdminUI();
       render(); renderMatches();
@@ -1049,7 +1180,14 @@ document.getElementById('abuse-modal').addEventListener('click', function (e) {
   if (e.target === this) { document.getElementById('abuse-modal').classList.add('hidden'); return; }
   var btn = e.target.closest('.abuse-btn');
   if (btn) {
-    runEffect(btn.getAttribute('data-effect'));
+    var eff = btn.getAttribute('data-effect');
+    fetch('/api/effect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Pass': adminPass || '' },
+      body: JSON.stringify({ effect: eff })
+    }).then(function (r) { return r.json(); }).then(function (e) {
+      if (e && e.id) { lastEffectId = e.id; runEffect(eff); }
+    }).catch(function () { runEffect(eff); });
     document.getElementById('abuse-modal').classList.add('hidden');
   }
 });
@@ -1762,68 +1900,121 @@ function makeSeaTexture(type) {
   c.width = 160; c.height = 160;
   var ctx = c.getContext('2d');
   ctx.clearRect(0, 0, 160, 160);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
   if (type === 'fish') {
     var col = ['#ff9f43','#ffb142','#4fd1c5','#f472b6','#818cf8'][Math.floor(Math.random() * 5)];
     ctx.fillStyle = col;
-    ctx.beginPath(); ctx.ellipse(80, 80, 46, 26, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(38, 80); ctx.lineTo(10, 56); ctx.lineTo(10, 104); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(80, 80, 46, 28, 0, 0, Math.PI * 2); ctx.fill();
+    // tail fin
+    ctx.beginPath(); ctx.moveTo(36, 80); ctx.lineTo(12, 54); ctx.lineTo(20, 80); ctx.lineTo(12, 106); ctx.closePath(); ctx.fill();
+    // dorsal fin
+    ctx.beginPath(); ctx.moveTo(58, 55); ctx.quadraticCurveTo(80, 32, 102, 55); ctx.closePath(); ctx.fill();
+    // pectoral fin
+    ctx.beginPath(); ctx.moveTo(62, 92); ctx.quadraticCurveTo(76, 110, 92, 96); ctx.closePath(); ctx.fill();
+    // eye
     ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.arc(100, 74, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(100, 72, 8, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#111111';
-    ctx.beginPath(); ctx.arc(102, 74, 3.4, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = 'rgba(0,0,0,0.22)';
-    ctx.beginPath(); ctx.arc(80, 96, 16, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(103, 72, 4, 0, Math.PI * 2); ctx.fill();
+    // smile
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(102, 90, 9, 0.2 * Math.PI, 0.8 * Math.PI); ctx.stroke();
   } else if (type === 'turtle') {
+    // flippers (behind shell)
     ctx.fillStyle = '#2e8b57';
-    ctx.beginPath(); ctx.ellipse(80, 96, 42, 34, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#1f6b43'; ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.ellipse(80, 96, 28, 21, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(44, 112, 18, 8, 0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(108, 116, 18, 8, -0.5, 0, Math.PI * 2); ctx.fill();
+    // head
     ctx.fillStyle = '#6cc070';
-    ctx.beginPath(); ctx.arc(126, 88, 14, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#111111'; ctx.beginPath(); ctx.arc(132, 86, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(122, 82, 15, 0, Math.PI * 2); ctx.fill();
+    // shell
     ctx.fillStyle = '#2e8b57';
-    ctx.beginPath(); ctx.ellipse(52, 118, 18, 8, 0.35, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(108, 122, 18, 8, -0.35, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(76, 90, 44, 34, 0, 0, Math.PI * 2); ctx.fill();
+    // scutes
+    ctx.strokeStyle = '#1f6b43'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.ellipse(76, 90, 30, 22, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(76, 62); ctx.lineTo(76, 118); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(52, 90); ctx.lineTo(100, 90); ctx.stroke();
+    // eye
+    ctx.fillStyle = '#111111';
+    ctx.beginPath(); ctx.arc(128, 80, 3.6, 0, Math.PI * 2); ctx.fill();
   } else if (type === 'jellyfish') {
-    ctx.fillStyle = 'rgba(198,130,255,0.85)';
-    ctx.beginPath(); ctx.arc(80, 60, 38, Math.PI, 0); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(198,130,255,0.9)';
+    // dome
+    ctx.beginPath(); ctx.arc(80, 54, 40, Math.PI, 0); ctx.closePath(); ctx.fill();
+    // wavy skirt under dome
+    ctx.beginPath(); ctx.moveTo(40, 54);
+    ctx.quadraticCurveTo(52, 70, 64, 54);
+    ctx.quadraticCurveTo(76, 70, 88, 54);
+    ctx.quadraticCurveTo(100, 70, 112, 54);
+    ctx.quadraticCurveTo(118, 66, 120, 54);
+    ctx.closePath();
+    ctx.fill();
+    // eyes
+    ctx.fillStyle = '#111111';
+    ctx.beginPath(); ctx.arc(66, 50, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(94, 50, 4, 0, Math.PI * 2); ctx.fill();
+    // tentacles connected under dome
     ctx.strokeStyle = 'rgba(198,130,255,0.7)'; ctx.lineWidth = 4;
-    for (var i = 0; i < 5; i++) {
-      var x = 52 + i * 14;
-      ctx.beginPath(); ctx.moveTo(x, 96);
-      ctx.quadraticCurveTo(x + Math.sin(i) * 10, 120, x + Math.sin(i * 2) * 12, 142);
+    var jx = [46, 62, 78, 94, 110];
+    for (var i = 0; i < jx.length; i++) {
+      var bend = (i % 2 === 0) ? -10 : 10;
+      ctx.beginPath();
+      ctx.moveTo(jx[i], 62);
+      ctx.quadraticCurveTo(jx[i] + bend, 104, jx[i] + bend * 0.5, 142);
       ctx.stroke();
     }
   } else if (type === 'octopus') {
     ctx.fillStyle = '#ff7bac';
-    ctx.beginPath(); ctx.arc(80, 56, 34, 0, Math.PI * 2); ctx.fill();
+    // head dome
+    ctx.beginPath(); ctx.arc(80, 50, 36, Math.PI, 0); ctx.closePath(); ctx.fill();
+    // body
+    ctx.beginPath(); ctx.ellipse(80, 74, 36, 26, 0, 0, Math.PI * 2); ctx.fill();
+    // eyes
     ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.arc(66, 48, 7, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(94, 48, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(66, 44, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(94, 44, 8, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#111111';
-    ctx.beginPath(); ctx.arc(66, 48, 3.2, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(94, 48, 3.2, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#ff7bac'; ctx.lineWidth = 5;
-    for (var j = 0; j < 6; j++) {
-      var x2 = 46 + j * 16;
-      ctx.beginPath(); ctx.moveTo(x2, 88);
-      ctx.quadraticCurveTo(x2 + Math.sin(j) * 10, 112, x2 + Math.sin(j * 2) * 12, 140);
+    ctx.beginPath(); ctx.arc(68, 44, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(92, 44, 4, 0, Math.PI * 2); ctx.fill();
+    // tentacles curling from under body
+    ctx.strokeStyle = '#ff7bac'; ctx.lineWidth = 7;
+    var ox = [44, 62, 80, 98, 116];
+    for (var j = 0; j < ox.length; j++) {
+      var sway = (j % 2 === 0) ? -12 : 12;
+      ctx.beginPath();
+      ctx.moveTo(ox[j], 88);
+      ctx.quadraticCurveTo(ox[j] + sway, 116, ox[j] + sway * 0.6, 142);
       ctx.stroke();
     }
   } else {
+    // crab
     ctx.fillStyle = '#ef5a5a';
-    ctx.beginPath(); ctx.ellipse(80, 92, 34, 24, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(34, 70, 14, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(126, 70, 14, 0, Math.PI * 2); ctx.fill();
+    // claws
+    ctx.beginPath(); ctx.arc(34, 58, 15, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(126, 58, 15, 0, Math.PI * 2); ctx.fill();
+    // body
+    ctx.beginPath(); ctx.ellipse(80, 84, 38, 26, 0, 0, Math.PI * 2); ctx.fill();
+    // eye stalks
+    ctx.beginPath(); ctx.ellipse(68, 46, 7, 14, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(92, 46, 7, 14, 0, 0, Math.PI * 2); ctx.fill();
+    // eyes
     ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.arc(70, 84, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(90, 84, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(68, 38, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(92, 38, 6, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#111111';
-    ctx.beginPath(); ctx.arc(70, 84, 2.6, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(90, 84, 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(70, 38, 2.8, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(90, 38, 2.8, 0, Math.PI * 2); ctx.fill();
+    // smile
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(80, 86, 12, 0.2 * Math.PI, 0.8 * Math.PI); ctx.stroke();
+    // legs
     ctx.strokeStyle = '#ef5a5a'; ctx.lineWidth = 4;
     for (var k = -2; k <= 2; k++) {
-      ctx.beginPath(); ctx.moveTo(80, 114); ctx.lineTo(80 + k * 16, 146); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(80 + k * 13, 104);
+      ctx.lineTo(80 + k * 18, 142); ctx.stroke();
     }
   }
   return new THREE.CanvasTexture(c);
@@ -1921,7 +2112,7 @@ function tsunami() {
         var ex = f3.userData.side;
         f3.position.x += ex * 0.18;
         f3.position.y += Math.sin(t * 1.6 + f3.userData.phase) * 0.02;
-        f3.material.rotation = Math.sin(t * 3 + f3.userData.phase) * 0.22;
+        f3.material.rotation = Math.sin(t * 3 + f3.userData.phase) * 0.08;
         f3.scale.x = f3.userData.sc * ex;
         if (Math.abs(f3.position.x) > 16) { f3.visible = false; continue; }
         f3.visible = true;
@@ -1930,7 +2121,7 @@ function tsunami() {
       f3.visible = true;
       f3.position.x += f3.userData.dir * f3.userData.speed;
       f3.position.y += Math.sin(t * 1.6 + f3.userData.phase) * 0.02;
-      f3.material.rotation = Math.sin(t * 3 + f3.userData.phase) * 0.22;
+      f3.material.rotation = Math.sin(t * 3 + f3.userData.phase) * 0.08;
       if (f3.position.x > 14) f3.userData.dir = -1;
       if (f3.position.x < -14) f3.userData.dir = 1;
       f3.scale.x = f3.userData.sc * f3.userData.dir;
@@ -2389,7 +2580,263 @@ document.getElementById('broadcast-input').addEventListener('keydown', function 
 pollBroadcast();
 setInterval(pollBroadcast, 2000);
 
+var effectsEnabled = (function () { try { return localStorage.getItem('lf-effects') !== 'off'; } catch (e) { return true; } })();
+var lastEffectId = null;
+var effectPrimed = false;
+function pollEffect() {
+  fetch('/api/effect').then(function (r) { return r.json(); }).then(function (e) {
+    if (!effectPrimed) {
+      effectPrimed = true;
+      lastEffectId = (e && e.id) ? e.id : null;
+      return;
+    }
+    if (e && e.id && e.id !== lastEffectId) {
+      lastEffectId = e.id;
+      if (effectsEnabled && e.effect) runEffect(e.effect);
+    }
+  }).catch(function () {});
+}
+pollEffect();
+setInterval(pollEffect, 2000);
+
+function applyEffectsToggle() {
+  var b = document.getElementById('effects-toggle');
+  if (b) {
+    b.classList.toggle('effects-off', !effectsEnabled);
+    b.title = effectsEnabled ? 'Admin effects: ON (click to hide)' : 'Admin effects: OFF (click to show)';
+  }
+}
+document.getElementById('effects-toggle').addEventListener('click', function () {
+  effectsEnabled = !effectsEnabled;
+  try { localStorage.setItem('lf-effects', effectsEnabled ? 'on' : 'off'); } catch (e) {}
+  applyEffectsToggle();
+});
+applyEffectsToggle();
+
+var lastSeenActivity = 0;
+try { lastSeenActivity = parseInt(localStorage.getItem('lf-seen-activity') || '0', 10) || 0; } catch (e) { lastSeenActivity = 0; }
+var unreadActivity = 0;
+function updateActivityBadge() {
+  var badge = document.getElementById('chat-badge');
+  if (!badge) return;
+  if (unreadActivity > 0) {
+    badge.textContent = unreadActivity > 99 ? '99+' : unreadActivity;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+function pollActivityCount() {
+  fetch('/api/activity/count').then(function (r) { return r.json(); }).then(function (d) {
+    var count = (d && d.count) || 0;
+    if (count > lastSeenActivity) {
+      unreadActivity = count - lastSeenActivity;
+    } else {
+      unreadActivity = 0;
+      if (count < lastSeenActivity) lastSeenActivity = count;
+    }
+    updateActivityBadge();
+  }).catch(function () {});
+}
+function markActivitySeen() {
+  unreadActivity = 0;
+  updateActivityBadge();
+  fetch('/api/activity/count').then(function (r) { return r.json(); }).then(function (d) {
+    lastSeenActivity = (d && d.count) || 0;
+    try { localStorage.setItem('lf-seen-activity', lastSeenActivity); } catch (e) {}
+  }).catch(function () {});
+}
+pollActivityCount();
+setInterval(pollActivityCount, 5000);
+
+var lastDataVersion = 0;
+var versionPrimed = false;
+function pollDataVersion() {
+  fetch('/api/version').then(function (r) { return r.json(); }).then(function (d) {
+    var v = (d && d.version) || 0;
+    if (!versionPrimed) { versionPrimed = true; lastDataVersion = v; return; }
+    if (v !== lastDataVersion) {
+      lastDataVersion = v;
+      loadItems();
+    }
+  }).catch(function () {});
+}
+pollDataVersion();
+setInterval(pollDataVersion, 3000);
+
+function galleryGo(id, dir) {
+  var it = null;
+  for (var i = 0; i < items.length; i++) { if (items[i].id === id) { it = items[i]; break; } }
+  if (!it) return;
+  var imgs = galleryImages(it);
+  if (imgs.length < 2) return;
+  var g = document.querySelector('.gallery[data-id="' + id + '"]');
+  if (!g) return;
+  var cur = parseInt(g.getAttribute('data-idx') || '0', 10);
+  gallerySet(id, (cur + dir + imgs.length) % imgs.length);
+}
+function gallerySet(id, idx) {
+  var it = null;
+  for (var i = 0; i < items.length; i++) { if (items[i].id === id) { it = items[i]; break; } }
+  if (!it) return;
+  var imgs = galleryImages(it);
+  if (idx < 0 || idx >= imgs.length) return;
+  var g = document.querySelector('.gallery[data-id="' + id + '"]');
+  if (!g) return;
+  g.setAttribute('data-idx', idx);
+  var img = g.querySelector('.photo-card-img');
+  if (img) img.setAttribute('src', imgs[idx]);
+  var dots = g.querySelectorAll('.gallery-dot');
+  for (var d = 0; d < dots.length; d++) dots[d].className = 'gallery-dot' + (d === idx ? ' active' : '');
+}
+function addCatalogPhoto(id, dataUrl) {
+  fetch('/api/items/' + id + '/images', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Pass': adminPass || '' },
+    body: JSON.stringify({ image: dataUrl, replace: true })
+  }).then(function (r) {
+    if (r.status === 403) { showToast('Admin required.'); return null; }
+    return r.json();
+  }).then(function (updated) {
+    if (!updated) return;
+    items = items.map(function (it) { return it.id === updated.id ? updated : it; });
+    renderMatches();
+    loadCatalog();
+  }).catch(function () { showToast('Could not update photo.'); });
+}
+function catalogItemHtml(it) {
+  var imgs = galleryImages(it);
+  var thumb = imgs[0]
+    ? '<img class="catalog-item-img" src="' + imgs[0] + '" alt="">'
+    : '<div class="catalog-item-img"></div>';
+  var typeBadge = it.type === 'found'
+    ? '<span class="catalog-type found">Found</span>'
+    : '<span class="catalog-type lost">Lost</span>';
+  var hiddenBadge = it.hidden ? ' <span class="badge-claimed">hidden</span>' : '';
+  var restoreBtn = it.hidden
+    ? '<button class="catalog-btn restore" data-id="' + it.id + '">&#8634; Restore</button>'
+    : '';
+  return '<li class="catalog-item' + (it.hidden ? ' hidden-item' : '') + '">' +
+    thumb +
+    '<div class="catalog-item-body">' +
+      '<div class="catalog-item-name">' + escapeHtml(it.item) + typeBadge + hiddenBadge + '</div>' +
+      '<div class="catalog-item-actions">' +
+        '<label class="catalog-btn" for="cat-replace-' + it.id + '">&#128247; Replace</label>' +
+        '<input id="cat-replace-' + it.id + '" type="file" accept="image/*" class="hidden cat-replace-input" data-id="' + it.id + '">' +
+        restoreBtn +
+        '<button class="catalog-btn danger" data-id="' + it.id + '">&#128465; Delete</button>' +
+      '</div>' +
+    '</div>' +
+  '</li>';
+}
+function loadCatalog() {
+  if (!isAdmin()) return;
+  fetch('/api/items?all=1', { headers: { 'X-Admin-Pass': adminPass || '' } })
+    .then(function (r) { return r.json(); })
+    .then(function (all) {
+      var list = document.getElementById('catalog-list');
+      if (!list) return;
+      all = all || [];
+      if (!all.length) { list.innerHTML = '<li class="empty">No items yet.</li>'; return; }
+      list.innerHTML = all.map(catalogItemHtml).join('');
+    }).catch(function () {});
+}
+function restoreItem(id) {
+  fetch('/api/items/' + id + '/hidden', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Pass': adminPass || '' },
+    body: JSON.stringify({ hidden: false })
+  }).then(function (r) { return r.json(); }).then(function (updated) {
+    if (!updated) return;
+    loadCatalog();
+    loadItems();
+  }).catch(function () { showToast('Could not restore item.'); });
+}
+document.getElementById('catalog-list').addEventListener('click', function (e) {
+  var del = e.target.closest('.catalog-btn.danger');
+  if (del) { deleteCatalogItem(del.getAttribute('data-id')); return; }
+  var rest = e.target.closest('.catalog-btn.restore');
+  if (rest) { restoreItem(rest.getAttribute('data-id')); }
+});
+document.getElementById('catalog-list').addEventListener('change', function (e) {
+  if (e.target.classList.contains('cat-replace-input')) {
+    var id = e.target.getAttribute('data-id');
+    var file = e.target.files && e.target.files[0];
+    if (file) { downscaleImage(file, function (dataUrl) { addCatalogPhoto(id, dataUrl); }); }
+    e.target.value = '';
+  }
+});
+function deleteCatalogItem(id) {
+  if (!confirm('Permanently delete this item?')) return;
+  fetch('/api/items/' + id, {
+    method: 'DELETE',
+    headers: { 'X-Admin-Pass': adminPass || '' }
+  }).then(function (r) { return r.json(); }).then(function (res) {
+    if (res && res.ok) { loadCatalog(); loadItems(); }
+  }).catch(function () { showToast('Could not delete item.'); });
+}
+var pendingCatalogImage = null;
+document.getElementById('catalog-add-photo').addEventListener('change', function (e) {
+  var file = e.target.files && e.target.files[0];
+  if (!file) return;
+  downscaleImage(file, function (dataUrl) {
+    pendingCatalogImage = dataUrl;
+    var pv = document.getElementById('catalog-add-preview');
+    pv.innerHTML = '<img src="' + dataUrl + '" alt="">';
+    pv.classList.remove('hidden');
+  });
+});
+document.getElementById('catalog-add-btn').addEventListener('click', function () {
+  var name = document.getElementById('catalog-add-name').value.trim();
+  if (!name) { showToast('Enter an item name.'); return; }
+  fetch('/api/items', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Pass': adminPass || '', 'X-Client-Id': clientId },
+    body: JSON.stringify({ name: 'Organizer', item: name, type: 'found', image: pendingCatalogImage })
+  }).then(function (r) {
+    if (r.status === 429) { showToast('Cooldown is on.'); return null; }
+    return r.json();
+  }).then(function (entry) {
+    if (!entry) return;
+    items.unshift(entry);
+    pendingCatalogImage = null;
+    document.getElementById('catalog-add-name').value = '';
+    document.getElementById('catalog-add-photo').value = '';
+    var pv = document.getElementById('catalog-add-preview');
+    pv.innerHTML = ''; pv.classList.add('hidden');
+    render(); renderMatches();
+  }).catch(function () { showToast('Could not add item.'); });
+});
+
+function disableAutofill() {
+  var inputs = document.querySelectorAll('input[type="text"], input[type="password"], input[type="search"]');
+  for (var i = 0; i < inputs.length; i++) {
+    var el = inputs[i];
+    el.setAttribute('autocomplete', 'off');
+    el.setAttribute('autocapitalize', 'off');
+    el.setAttribute('autocorrect', 'off');
+    el.setAttribute('spellcheck', 'false');
+    // randomize name so the browser can never match a saved autofill value
+    if (!el.getAttribute('data-lf-name')) {
+      el.setAttribute('name', 'lf_' + Math.random().toString(36).slice(2, 10));
+      el.setAttribute('data-lf-name', '1');
+    }
+  }
+}
+
 loadItems();
+disableAutofill();
+
+// Clear search on load and on back/forward navigation so the browser never
+// restores a previously-typed search query (autofill).
+function clearSearch() {
+  var si = document.getElementById('search-input');
+  if (si) si.value = '';
+}
+clearSearch();
+window.addEventListener('pageshow', function (e) {
+  if (e.persisted) { clearSearch(); renderMatches(); }
+});
 
 var savedName = localStorage.getItem('lf-name');
 if (savedName) {
@@ -2402,8 +2849,6 @@ if (savedName) {
   var body = document.getElementById('chat-body');
   var input = document.getElementById('chat-input');
   var send = document.getElementById('chat-send');
-  var greeted = false;
-
   function addMsg(text, who) {
     var el = document.createElement('div');
     el.className = 'chat-msg ' + who;
@@ -2413,10 +2858,7 @@ if (savedName) {
   }
   function openPanel() {
     panel.classList.toggle('hidden');
-    if (!panel.classList.contains('hidden') && !greeted) {
-      greeted = true;
-      addMsg("Hi! I can answer questions about this Lost & Found board. Try asking how to report a lost item or search for something.", 'bot');
-    }
+    if (!panel.classList.contains('hidden')) markActivitySeen();
   }
   function sendMsg() {
     var msg = input.value.trim();

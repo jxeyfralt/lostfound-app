@@ -1,0 +1,11 @@
+node_modules/
+uploads/
+*.log
+.DS_Store
+items.json
+activity.json
+settings.json
+broadcast.json
+lostfound.db
+lostfound.db-wal
+lostfound.db-shm
