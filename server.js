@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const { DatabaseSync } = require('node:sqlite');
 
 const PORT = process.env.PORT || 3000;
-const ADMIN_PASS = process.env.ADMIN_PASS || 'purplebooger';
+const ADMIN_PASS = process.env.ADMIN_PASS || 'louisaintadmin';
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'lostfound.db');
 
 // Legacy flat files (used only for one-time import on first run)
@@ -477,7 +477,18 @@ const server = http.createServer(function (req, res) {
             authorToken: (type === 'lost') ? genToken() : null,
             replies: []
           };
-          entry.image = dataUrlToImage(data.image, entry.id);
+          const images = [];
+          if (Array.isArray(data.images) && data.images.length) {
+            for (let i = 0; i < data.images.length; i++) {
+              const u = dataUrlToImage(data.images[i], entry.id + '-' + i);
+              if (u) images.push(u);
+            }
+          } else if (data.image) {
+            const u = dataUrlToImage(data.image, entry.id);
+            if (u) images.push(u);
+          }
+          entry.image = images[0] || null;
+          entry.images = images;
           createItem(entry);
           recordPost(req);
           logActivity('post', name + ' lost "' + item + '"');
