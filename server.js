@@ -185,8 +185,35 @@ function updateItemFound(id, found, foundAt) {
   qUpdateFound.run(found ? 1 : 0, foundAt || null, id);
   bumpDataVersion();
 }
+function removeItemFromSeed(id) {
+  if (!fs.existsSync(LEGACY_ITEMS)) return;
+  try {
+    const items = JSON.parse(fs.readFileSync(LEGACY_ITEMS, 'utf8'));
+    const filtered = items.filter(function (it) { return it.id !== id; });
+    if (filtered.length !== items.length) {
+      fs.writeFileSync(LEGACY_ITEMS, JSON.stringify(filtered, null, 2));
+      console.log('Removed ' + id + ' from items.json seed');
+    }
+  } catch (e) { console.error('items.json seed update failed:', e.message); }
+}
 function deleteItem(id) {
+  const row = getItem(id);
+  if (row) {
+    let imgs = [];
+    try { imgs = JSON.parse(row.images || '[]'); } catch (e) { imgs = []; }
+    if (!Array.isArray(imgs)) imgs = [];
+    if (imgs.length === 0 && row.image) imgs = [row.image];
+    for (const u of imgs) {
+      if (typeof u === 'string' && u.startsWith('/uploads/')) {
+        const fn = path.basename(u);
+        db.prepare('DELETE FROM images WHERE id = ?').run(fn);
+        const p = path.join(LEGACY_UPLOADS, fn);
+        try { if (fs.existsSync(p)) fs.unlinkSync(p); } catch (e) {}
+      }
+    }
+  }
   qDeleteItem.run(id);
+  removeItemFromSeed(id);
   bumpDataVersion();
 }
 function updateItemReplies(id, replies) {
