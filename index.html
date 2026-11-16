@@ -751,8 +751,7 @@ function renderMatches() {
     .filter(function (it) { return it.type === 'found'; })
     .map(function (it) { return { it: it, score: similarity(q, color, it) }; })
     .filter(function (r) { return r.score > 0; })
-    .sort(function (a, b) { return b.score - a.score; })
-    .slice(0, 12);
+    .sort(function (a, b) { return b.score - a.score; });
 
   if (results.length === 0) {
     panel.innerHTML = '<div class="matches-head">No matches</div><p class="matches-sub-empty">Nothing in the box for &ldquo;' + escapeHtml(q) + '&rdquo;.</p>';
@@ -2854,12 +2853,7 @@ document.getElementById('catalog-add-btn').addEventListener('click', function ()
   var count = pendingCatalogImages.length;
   var done = 0, added = 0;
   pendingCatalogImages.forEach(function (p, i) {
-    var itemName = name;
-    if (!itemName) {
-      itemName = fileNameToName(p.file, i);
-    } else if (count > 1) {
-      itemName = name + ' ' + (i + 1);
-    }
+    var itemName = name || fileNameToName(p.file, i);
     fetch('/api/items', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Admin-Pass': adminPass || '', 'X-Client-Id': clientId },
