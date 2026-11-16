@@ -423,9 +423,9 @@
           <button id="catalog-close" class="dashboard-close" title="Close">&#10005;</button>
         </div>
         <div class="catalog-add-form">
-          <input id="catalog-add-name" type="text" placeholder="Found item name (e.g. Blue jacket)" autocomplete="off">
+          <input id="catalog-add-name" type="text" placeholder="Item name — blank uses each photo's filename" autocomplete="off">
           <label class="upload-btn" for="catalog-add-photo">&#128247; Photos</label>
-          <input id="catalog-add-photo" type="file" accept="image/*,.heic,.heif,image/heic,image/heif" class="hidden" multiple>
+          <input id="catalog-add-photo" type="file" accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif,.HEIC,.HEIF" class="hidden" multiple>
           <span id="catalog-add-preview" class="reply-img-preview hidden"></span>
           <button id="catalog-add-btn" class="btn-primary">+ Add to catalog</button>
         </div>
@@ -458,7 +458,7 @@
           <div class="field">
             <label>Photo (optional)</label>
             <label class="upload-btn" for="report-photo">&#128247; Upload image</label>
-            <input id="report-photo" type="file" accept="image/*,.heic,.heif,image/heic,image/heif" class="hidden">
+            <input id="report-photo" type="file" accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif,.HEIC,.HEIF" class="hidden">
             <span id="report-photo-preview" class="reply-img-preview hidden"></span>
           </div>
           <button type="submit" class="btn-primary">+ Add lost report</button>
@@ -687,7 +687,7 @@ function lostCard(it) {
           '<textarea class="reply-msg-input" placeholder="I found it, or any info&hellip;"></textarea>' +
           '<div class="reply-form-row">' +
             '<label class="upload-btn" for="reply-image-' + it.id + '">&#128247; Upload image</label>' +
-            '<input id="reply-image-' + it.id + '" class="reply-image" type="file" accept="image/*,.heic,.heif,image/heic,image/heif">' +
+            '<input id="reply-image-' + it.id + '" class="reply-image" type="file" accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif,.HEIC,.HEIF">' +
             '<span class="reply-img-preview hidden"></span>' +
             '<button class="btn-reply-submit" data-id="' + it.id + '">Post reply</button>' +
           '</div>' +
@@ -2767,7 +2767,7 @@ function catalogItemHtml(it) {
       '<div class="catalog-item-name">' + escapeHtml(it.item) + typeBadge + hiddenBadge + '</div>' +
       '<div class="catalog-item-actions">' +
         '<label class="catalog-btn" for="cat-replace-' + it.id + '">&#128247; Replace</label>' +
-        '<input id="cat-replace-' + it.id + '" type="file" accept="image/*,.heic,.heif,image/heic,image/heif" class="hidden cat-replace-input" data-id="' + it.id + '">' +
+        '<input id="cat-replace-' + it.id + '" type="file" accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif,.HEIC,.HEIF" class="hidden cat-replace-input" data-id="' + it.id + '">' +
         restoreBtn +
         '<button class="catalog-btn danger" data-id="' + it.id + '">&#128465; Delete</button>' +
       '</div>' +
@@ -2821,6 +2821,7 @@ function deleteCatalogItem(id) {
   }).catch(function () { showToast('Could not delete item.'); });
 }
 var pendingCatalogImages = [];
+var pendingCatalogImages = []; // array of { dataUrl, file }
 document.getElementById('catalog-add-photo').addEventListener('change', function (e) {
   var files = e.target.files;
   if (!files || !files.length) return;
@@ -2832,37 +2833,55 @@ document.getElementById('catalog-add-photo').addEventListener('change', function
   var remaining = list.length;
   list.forEach(function (file) {
     downscaleImage(file, function (dataUrl) {
-      if (dataUrl) pendingCatalogImages.push(dataUrl);
+      if (dataUrl) pendingCatalogImages.push({ dataUrl: dataUrl, file: file.name });
       remaining--;
       if (remaining === 0) {
-        pv.innerHTML = pendingCatalogImages.map(function (d) {
-          return '<img src="' + d + '" alt="">';
+        pv.innerHTML = pendingCatalogImages.map(function (p) {
+          return '<img src="' + p.dataUrl + '" alt="">';
         }).join('');
         if (!pendingCatalogImages.length) pv.classList.add('hidden');
       }
     });
   });
 });
+function fileNameToName(fn, i) {
+  var base = String(fn || '').replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+  return base || ('Item ' + (i + 1));
+}
 document.getElementById('catalog-add-btn').addEventListener('click', function () {
   var name = document.getElementById('catalog-add-name').value.trim();
-  if (!name) { showToast('Enter an item name.'); return; }
-  fetch('/api/items', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Admin-Pass': adminPass || '', 'X-Client-Id': clientId },
-    body: JSON.stringify({ name: 'Organizer', item: name, type: 'found', images: pendingCatalogImages })
-  }).then(function (r) {
-    if (r.status === 429) { showToast('Cooldown is on.'); return null; }
-    return r.json();
-  }).then(function (entry) {
-    if (!entry) return;
-    items.unshift(entry);
-    pendingCatalogImages = [];
-    document.getElementById('catalog-add-name').value = '';
-    document.getElementById('catalog-add-photo').value = '';
-    var pv = document.getElementById('catalog-add-preview');
-    pv.innerHTML = ''; pv.classList.add('hidden');
-    render(); renderMatches();
-  }).catch(function () { showToast('Could not add item.'); });
+  if (!pendingCatalogImages.length) { showToast('Select one or more photos.'); return; }
+  var count = pendingCatalogImages.length;
+  var done = 0, added = 0;
+  pendingCatalogImages.forEach(function (p, i) {
+    var itemName = name;
+    if (!itemName) {
+      itemName = fileNameToName(p.file, i);
+    } else if (count > 1) {
+      itemName = name + ' ' + (i + 1);
+    }
+    fetch('/api/items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Pass': adminPass || '', 'X-Client-Id': clientId },
+      body: JSON.stringify({ name: 'Organizer', item: itemName, type: 'found', image: p.dataUrl })
+    }).then(function (r) {
+      if (r.status === 429) { showToast('Cooldown is on.'); return null; }
+      return r.json();
+    }).then(function (entry) {
+      if (entry) { items.unshift(entry); added++; }
+    }).catch(function () {}).then(function () {
+      done++;
+      if (done === count) {
+        pendingCatalogImages = [];
+        document.getElementById('catalog-add-name').value = '';
+        document.getElementById('catalog-add-photo').value = '';
+        var pv = document.getElementById('catalog-add-preview');
+        pv.innerHTML = ''; pv.classList.add('hidden');
+        render(); renderMatches();
+        if (added < count) showToast('Added ' + added + ' of ' + count + ' items.');
+      }
+    });
+  });
 });
 
 function disableAutofill() {
