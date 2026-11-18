@@ -121,6 +121,10 @@ function dataUrlToImage(dataUrl, name) {
   if (buf.length === 0 || buf.length >= 10 * 1024 * 1024) return null;
   const filename = name + '.' + ext;
   db.prepare('INSERT OR REPLACE INTO images (id, mime, data) VALUES (?, ?, ?)').run(filename, mime, buf);
+  try {
+    fs.mkdirSync(LEGACY_UPLOADS, { recursive: true });
+    fs.writeFileSync(path.join(LEGACY_UPLOADS, filename), buf);
+  } catch (e) { console.error('upload write failed:', e.message); }
   return '/uploads/' + filename;
 }
 
@@ -166,6 +170,41 @@ function getItems(includeHidden) {
 function getItem(id) {
   return qItemById.get(id);
 }
+function syncItemToSeedById(id) {
+  const row = getItem(id);
+  if (!row) return;
+  try {
+    let arr = [];
+    if (fs.existsSync(LEGACY_ITEMS)) {
+      try {
+        const existing = JSON.parse(fs.readFileSync(LEGACY_ITEMS, 'utf8'));
+        if (Array.isArray(existing)) arr = existing;
+      } catch (e) {}
+    }
+    let images = [];
+    try { const a = JSON.parse(row.images || '[]'); if (Array.isArray(a)) images = a; } catch (e) { images = []; }
+    const imgs = images.length ? images : (row.image ? [row.image] : []);
+    let replies = [];
+    try { const r = JSON.parse(row.replies || '[]'); if (Array.isArray(r)) replies = r; } catch (e) { replies = []; }
+    const seedItem = {
+      id: row.id,
+      type: row.type,
+      name: row.name,
+      item: row.item,
+      color: row.color || null,
+      found: !!row.found,
+      createdAt: row.createdAt,
+      foundAt: row.foundAt || null,
+      authorToken: row.authorToken || null,
+      image: imgs[0] || null,
+      images: imgs,
+      replies: replies
+    };
+    const i = arr.findIndex(function (x) { return x.id === row.id; });
+    if (i === -1) arr.unshift(seedItem); else arr[i] = seedItem;
+    fs.writeFileSync(LEGACY_ITEMS, JSON.stringify(arr, null, 2));
+  } catch (e) { console.error('items.json sync failed:', e.message); }
+}
 function createItem(entry) {
   const images = Array.isArray(entry.images) && entry.images.length ? entry.images : (entry.image ? [entry.image] : []);
   qInsertItem.run(
@@ -179,11 +218,13 @@ function createItem(entry) {
     JSON.stringify(entry.replies || [])
   );
   bumpDataVersion();
+  syncItemToSeedById(entry.id);
   return entry;
 }
 function updateItemFound(id, found, foundAt) {
   qUpdateFound.run(found ? 1 : 0, foundAt || null, id);
   bumpDataVersion();
+  syncItemToSeedById(id);
 }
 function removeItemFromSeed(id) {
   if (!fs.existsSync(LEGACY_ITEMS)) return;
@@ -219,15 +260,18 @@ function deleteItem(id) {
 function updateItemReplies(id, replies) {
   qUpdateReplies.run(JSON.stringify(replies), id);
   bumpDataVersion();
+  syncItemToSeedById(id);
 }
 
 function setItemImages(id, images) {
   qUpdateImages.run(JSON.stringify(images), id);
   bumpDataVersion();
+  syncItemToSeedById(id);
 }
 function setItemHidden(id, hidden) {
   qSetHidden.run(hidden ? 1 : 0, id);
   bumpDataVersion();
+  syncItemToSeedById(id);
 }
 
 function getActivity() {
@@ -317,6 +361,7 @@ function migrateLegacy() {
           foundAt: it.foundAt || null,
           authorToken: it.authorToken || null,
           image: it.image || null,
+          images: Array.isArray(it.images) && it.images.length ? it.images : (it.image ? [it.image] : []),
           replies: Array.isArray(it.replies) ? it.replies : []
         });
       }
@@ -816,3 +861,14 @@ server.listen(PORT, '0.0.0.0', function () {
   console.log('Lost & Found running at http://localhost:' + PORT);
   console.log('SQLite DB: ' + DB_PATH);
 });
+
+// Keep the main SQLite file current so recently added images/items survive sleep and restarts.
+setInterval(function () {
+  try { db.exec('PRAGMA wal_checkpoint(TRUNCATE)'); } catch (e) {}
+}, 30 * 1000);
+function gracefulCheckpoint() {
+  try { db.exec('PRAGMA wal_checkpoint(TRUNCATE)'); } catch (e) {}
+  process.exit(0);
+}
+process.on('SIGTERM', gracefulCheckpoint);
+process.on('SIGINT', gracefulCheckpoint);
